@@ -19,4 +19,5 @@ python make_features_map_SBC.py -mapback -i $EXDIR/test.MAC.conll09 -m $EXDIR/ma
 # echo "evaluating..." 
 # python evaluate.py gold1.txt pred.txt
 echo "evaluation"
-python evaluate_conll.py $EXDIR/test.conll09 $EXDIR/pred.conll09 > result.txt
+python evaluate_conll.py $EXDIR/test.conll09 $EXDIR/pred.conll09 > $EXDIR/result.txt
+cat $EXDIR/result.txt
