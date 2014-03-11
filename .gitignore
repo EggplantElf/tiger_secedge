@@ -1,0 +1,9 @@
+*.pyc
+*.xml
+*.conll09
+*.features
+evaluation/tmp/
+evaluation/*.txt
+evaluation/*.features
+evaluation/*.conll09
+evaluation/*.xml
