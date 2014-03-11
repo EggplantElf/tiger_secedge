@@ -1,0 +1,6 @@
+ex1:
+train.conll09 contains 1168 SBR, 1046 SBE and 828 SBC (not accurate, should subtract those in test)
+
+
+ex2:
+train.conll09 has no SBC labels

@@ -1,6 +1,9 @@
-*.pyc
 *.xml
+*.pyc
 *.conll09
 *.features
 useful_data/
-experiment/data/
+experiment/data/**/
+!experiment/experiments.log
+
+
