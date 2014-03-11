@@ -35,6 +35,8 @@ class Token(object):
         #     print '\t'.join(self.entries)
         return '\t'.join(self.entries)
 
+
+
 class Root(Token):
     def __init__(self):
         self.form = '-ROOT-'
@@ -57,27 +59,25 @@ def postprocess_tokens(sentence):
             token.head.deps.append((token))
         # find the secendary subject with label of the token
         for (index, label) in token.sec_heads.items():
-            # if label in ['SBM', 'SBA', 'SBR', 'SBE', 'SBC']:
-            sentence[int(index) - 1].sec_subj[token] = label # verb.sec_subj[noun] = label
+            if label in ['SBM', 'SBA' ,'SBC']:
+                sentence[int(index) - 1].sec_subj[token] = label # verb.sec_subj[subj] = label
 
 
 def update_label(token1, token2, label):
-    token1.sec_subj[token2] = label
-    for (k, v) in token2.sec_heads.items():
-        if k == token1.tid:
-            # print token2.sec_heads
-            token2.sec_heads[k] = label
-    # premise: index also sorted in original file
-    if token2.sec_heads:
-        token2.entries[12] = '|'.join([t for (t, l) in sorted(token2.sec_heads.items(), key = lambda x: int(x[0]))])
-        token2.entries[14] = '|'.join([l for (t, l) in sorted(token2.sec_heads.items(), key = lambda x: int(x[0]))])
-    else:
-        token2.entries[12] = '_'
-        token2.entries[14] = '_'
-    # print '\t'.join(token2.entries)
-
-
-
+    if label:
+        token1.sec_subj[token2] = label
+        for (k, v) in token2.sec_heads.items():
+            if k == token1.tid:
+                # print token2.sec_heads
+                token2.sec_heads[k] = label
+        # premise: index also sorted in original file
+        if token2.sec_heads:
+            token2.entries[12] = '|'.join([t for (t, l) in sorted(token2.sec_heads.items(), key = lambda x: int(x[0]))])
+            token2.entries[14] = '|'.join([l for (t, l) in sorted(token2.sec_heads.items(), key = lambda x: int(x[0]))])
+        else:
+            token2.entries[12] = '_'
+            token2.entries[14] = '_'
+        # print '\t'.join(token2.entries)
 
 
 
@@ -159,7 +159,6 @@ class FeatureTable(object):
 
 
 
-
 def write_to_file( label, features, fileobj ):
     features = set(features)
     features.discard(None)
@@ -183,7 +182,6 @@ def get_useful_tokens(verb, sentence):
     dic['HEAD3.DA'] = get_token_by_path(sentence, dic['HEAD3'], ['DA'])
     dic['HEAD3.OP.NK'] = get_token_by_path(sentence, dic['HEAD3'], ['OP', 'NK'])
 
-
     return dic
 
 
@@ -201,6 +199,9 @@ def make_verb_feature_vector(useful_tokens, verb, sentence, mapfunc):
 
     features.append(mapfunc('ZU_INF:%s' % (verb.pos == 'VVIZU' or get_token_by_path(sentence, verb, ['PM'])) and True or False))
     features.append(mapfunc('SELF.OC:%s' % get_pos(get_token_by_path(sentence, verb, ['OC']))))
+
+
+
 
     features.append(mapfunc('HEAD1.LEMMA:%s' % get_lemma(useful_tokens['HEAD1'])))
     features.append(mapfunc('HEAD2.LEMMA:%s' % get_lemma(useful_tokens['HEAD2'])))
@@ -313,12 +314,9 @@ def get_lemma(token):
 
 
 
-
-
 if __name__=='__main__':
     import argparse
 
-    count = 0
     argpar = argparse.ArgumentParser(description='Creates a feature representation for each word in a given file in CoNLL09 format')
     mode = argpar.add_mutually_exclusive_group(required=True)
     mode.add_argument('-train',dest='train',action='store_true',help='run in training mode')
@@ -334,58 +332,89 @@ if __name__=='__main__':
     outstream = open(args.outputfile,'w')
 
     if args.mapback:
-        # exactly the sequence as predict(test)
         pred = codecs.open(args.predfile,encoding='utf-8')
         feattab.load(args.mapfile)
         feattab.invert_tabs()
 
         for sentence in sentences(codecs.open(args.inputfile,encoding='utf-8')):
-            for tid1, token1 in enumerate(sentence):
-                for token2 in token1.sec_subj:
-                    label = token1.sec_subj[token2]
-                    if label in ['SBC']:
-                        count += 1
-                        pred_label = feattab.mapback_label(int(pred.readline()))
-                        # print pred_label
-                        update_label(token1, token2, pred_label)
+            for tid1,token1 in enumerate(sentence):
+                if token1.pos[0] == 'V' and token1.head.pos != '-ROOT-':
+                    useful_tokens = get_useful_tokens(token1, sentence)
+                    # print useful_tokens
+                    # add feature of verb
+                    verb_features = make_verb_feature_vector(useful_tokens,token1, sentence,feattab.register_feature)
+                    for tid2, token2 in enumerate(sentence):
+                        if tid1 != tid2:
+                            pred_label = feattab.mapback_label(int(pred.readline()))
+                            if pred_label:
+                                update_label(token1, token2, pred_label)
+
+
+
+            
             for tid, token in enumerate(sentence):
                 print >> outstream, token.to_line()
             print >> outstream, ''
-        print count
+
+
 
 
     elif args.train:
-        feattab.register_label('SBR')
-        feattab.register_label('SBE')
         for sentence in sentences(codecs.open(args.inputfile,encoding='utf-8')):
-            for tid1, token1 in enumerate(sentence):
-                for token2 in token1.sec_subj:
-                    label = token1.sec_subj[token2]
-                    if label in ['SBR', 'SBE']:
-                        i = feattab.labeltab[label]
-                        useful_tokens = get_useful_tokens(token1, sentence)
-                        verb_features = make_verb_feature_vector(useful_tokens,token1, sentence,feattab.register_feature)
-                        noun_features = make_noun_feature_vector(useful_tokens, token2, sentence,feattab.register_feature)
-                        write_to_file(i,verb_features + noun_features,outstream)
-
+            for tid1,token1 in enumerate(sentence):
+                if token1.pos[0] == 'V' and token1.head.pos != '-ROOT-':
+                    useful_tokens = get_useful_tokens(token1, sentence)
+                    # print useful_tokens
+                    # add feature of verb
+                    verb_features = make_verb_feature_vector(useful_tokens,token1, sentence,feattab.register_feature)
+                    for tid2, token2 in enumerate(sentence):
+                        if tid1 != tid2:
+                            # add label
+                            if token2 in token1.sec_subj:
+                                label = feattab.register_label(token1.sec_subj[token2])
+                            else:
+                                label = feattab.register_label('')
+                            # add feature of noun
+                            noun_features = make_noun_feature_vector(useful_tokens, token2, sentence,feattab.register_feature)
+                            # print verb_features + noun_features
+                            write_to_file(label,verb_features + noun_features,outstream)
         feattab.save(args.mapfile)
+
+        # print '-' * 20
+        # for k in feattab.feattab:
+        #   print k, feattab.feattab[k]
+
 
 
     elif args.test:
+        # result = open('gold.txt', 'w')
+
         feattab.load(args.mapfile)
         for sentence in sentences(codecs.open(args.inputfile,encoding='utf-8')):
-            for tid1, token1 in enumerate(sentence):
-                for token2 in token1.sec_subj:
-                    label = token1.sec_subj[token2]
-                    if label in ['SBC']:
-                        count += 1
-                        useful_tokens = get_useful_tokens(token1, sentence)
-                        verb_features = make_verb_feature_vector(useful_tokens,token1, sentence,feattab.register_feature)
-                        noun_features = make_noun_feature_vector(useful_tokens, token2, sentence,feattab.register_feature)
-                        write_to_file(0, verb_features + noun_features,outstream)        
-        print count
+            # for tid,token in enumerate(sentence):
+            #   features = make_feature_vector(tid,token,sentence,feattab.map_feature)
+            #   write_to_file(0,features,outstream)
 
-
+            for tid1,token1 in enumerate(sentence):
+                if token1.pos[0] == 'V' and token1.head.pos != '-ROOT-':
+                    useful_tokens = get_useful_tokens(token1, sentence)
+                    # print useful_tokens
+                    # add feature of verb
+                    verb_features = make_verb_feature_vector(useful_tokens,token1, sentence,feattab.register_feature)
+                    for tid2, token2 in enumerate(sentence):
+                        if tid1 != tid2:
+                            # add label
+                            if token2 in token1.sec_subj:
+                                label = token1.sec_subj[token2]
+                            else:
+                                label = ''
+                            # i = feattab.map_label(label)
+                            # result.write('%d\t%s\t%s\t%s\t%s\n' % (i, token1.sid, label, token2.form, token1.form))
+                            # add feature of noun
+                            noun_features = make_noun_feature_vector(useful_tokens, token2, sentence,feattab.register_feature)
+                            # print verb_features + noun_features
+                            write_to_file(i,verb_features + noun_features,outstream)
+        # result.close()
     outstream.close()
 
 

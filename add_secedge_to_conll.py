@@ -30,8 +30,8 @@ def add_secedge(conll_file, xml_file, output_file, sid = None):
         print 'done'
 
 
-        for i in xml_dic.keys()[:5]:
-            print i, xml_dic[i]
+        # for i in xml_dic.keys()[:5]:
+        #     print i, xml_dic[i]
 
         print 'reading conll file...'
         conll_dic = {}
@@ -132,7 +132,7 @@ def head_chain(conll, i):
 
 
 if __name__ == '__main__':
-    add_secedge('evaluation/tiger10001-11000.orig.conll09', 'evaluation/tiger10001-11000.gold.xml', 'evaluation/tiger10001-11000.gold.conll09')
+    add_secedge(sys.argv[1], sys.argv[2], sys.argv[3])
 
 
 

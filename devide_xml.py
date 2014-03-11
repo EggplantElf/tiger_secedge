@@ -3,7 +3,7 @@
 xml_info = '<?xml version="1.0" encoding="utf-8" standalone="yes"?>\r\n'
 
 
-def devide(filename, dir, sents_in_each_file = 5000):
+def devide(filename, dir, sents_in_each_file = 1000):
     sents = {}
     in_body = False
     string = ''
@@ -40,4 +40,4 @@ def devide(filename, dir, sents_in_each_file = 5000):
 
 
 if __name__ == '__main__':
-    devide('../TIGER/tiger8.1.4.xml', '../TIGER/newparts/')
+    devide('../TIGER/tiger8.1.3.xml', '../TIGER/newparts/')
