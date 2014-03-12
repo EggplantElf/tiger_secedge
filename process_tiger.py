@@ -1,19 +1,17 @@
+#!/bin/python
+# -*- coding: utf-8 -*-
+
+
 import bs4, os, re
 debug = 0
-
 sid = 17
-collect = False
+
 TOTAL, EXCEPTION = 0, 0
-STEP = '123'
-# if debug == 1:
-#     STEP = '123'
-# elif debug in [2,3]:
-#     STEP = '4'
-STAT = {'SBM': 0, 'SBA': 0, 'SBR': 0, 'SBE': 0, 'SBC': 0, 'SBU': 0, 'NOR': 0, 'NOE': 0, 'NOC': 0, 'NOM': 0}
+STEP = '1'
+STAT = {'SBM': 0, 'SBA': 0, 'SBR': 0, 'SBE': 0, 'SBC': 0, 'SBU': 0}
 MISSED = {}
 ALL = {}
 COLLECTION = ''
-FIRST, SECOND, THIRD, FORTH = 0, 0, 0, 0
 
 #####################################
 # walk through all sents or debug
@@ -47,92 +45,59 @@ def walk(input_file, output_file, raising_file, equi_file, start = 0, end = 6000
     g.write(open('../TIGER/head.xml').read())
     g.write('<body>\r\n')
 
-    i = 0
     for sent in corpus:
         sent = bs4.BeautifulSoup(sent, 'xml', from_encoding="utf-8")
-        # process(sent.graph, raising_dic, equi_dic)
-        # g.write(sent.s.prettify('utf-8', formatter = convert_entity) + '\r\n')
-        gid = int(sent.graph['root'].split('_')[0][1:])
-        if gid >= start and gid <= end:
+        sid = int(sent.graph['root'].split('_')[0][1:])
+        if sid >= start and sid <= end:
             process(sent.graph, raising_dic, equi_dic)
-            g.write(sent.s.prettify('utf-8', formatter = convert_entity) + '\r\n')
-        else:
-            g.write(sent.s.prettify('utf-8', formatter = convert_entity) + '\r\n')
-        # i += 1
-        # if i > 500:
-        #     break
+        g.write(sent.s.prettify('utf-8', formatter = convert_entity) + '\r\n')
+
 
     g.write('</body>\r\n</corpus>\r\n')
     g.close()
-    # if collect:
-        # write_collection()
     print 'SBM:', STAT['SBM']
     print 'SBA:', STAT['SBA']
     print 'SBR:', STAT['SBR']
     print 'SBE:', STAT['SBE']
     print 'SBC:', STAT['SBC']
-    print 'NOR:', STAT['NOR']
-    print 'NOE:', STAT['NOE']
-    print 'NOC:', STAT['NOC']
-    print 'NOM:', STAT['NOM']
-    print 'FIRST', FIRST
-
-
-    if '4' in STEP:
-
-        f = open('missed_stats.txt', 'w')
-
-        f.write('total: %d\n' % sum([len(ALL[l]) for l in ALL]))
-        f.write('missed: %d\n\n' % sum([len(MISSED[l]) for l in MISSED]))
-
-        for lemma in ALL:
-            if lemma not in MISSED:
-                MISSED[lemma] = []
-
-        for lemma in sorted(ALL.keys(), key = lambda x: len(MISSED[x]), reverse = True):
-            f.write('%s\t\t%d / %d\n' % (lemma, len(MISSED[lemma]), len(ALL[lemma])))
-
-        f.write('\n\n\n\n\n')
-
-        for lemma in sorted(ALL.keys(), key = lambda x: len(MISSED[x]), reverse = True):
-            f.write('%s\t%d / %d\n' % (lemma, len(MISSED[lemma]), len(ALL[lemma])))
-            f.write(', '.join(MISSED[lemma]) + '\n\n')
-        f.close()
+    # print 'NOR:', STAT['NOR']
+    # print 'NOE:', STAT['NOE']
+    # print 'NOC:', STAT['NOC']
+    # print 'NOM:', STAT['NOM']
 
 
 
 
 def process(graph, raising_dic, equi_dic):
-
     root = root_node(graph)
-    # print sid
     sid = int(root['id'].split('_')[0][1:])
-    # print sid
 
-    # step 1: SBM, SBA
+    # step 1: find SBM, SBA
     if '1' in STEP:
         mod_aux_helper(graph, root)
 
-    # step 2: SBR
+    # step 2: find SBR using informations from LFG
     if '2' in STEP:
         if sid in raising_dic:
             for items in raising_dic[sid]:
                 ctrl_helper(graph, items, '-r')
 
-    # step 3: SBE
+    # step 3: find SBE using informations from LFG
     if '3' in STEP:
         if sid in equi_dic:
             for items in equi_dic[sid]:
                 ctrl_helper(graph, items, '-e')
 
-    # if '4' in STEP:
-    #     ctrl_finder_helper(graph, root)
-
-    # step 5: ctrl_without_lfg
+    # (optional) find control(SBC) without information from LFG
     if '4' in STEP:
         ctrl_without_lfg(graph, root)
 
+    # (optional) ???
     if '5' in STEP:
+        ctrl_finder_helper(graph, root)
+
+    # (optional) inspect the zu-infinitive verb which has no secondary edges
+    if '6' in STEP:
         vz_no_edge(graph)
 
 
@@ -141,37 +106,38 @@ def process(graph, raising_dic, equi_dic):
 
 
 #####################################
-# step 1: add secedge to SBA and SBM
 
 
-# with some bug to cause inefficiency
 def mod_aux_helper(graph, node, subj = None, label = ''):
-    mod, aux, oc, hd = None, None, None, None
+    """
+    step 1: add secedge to SBA and SBM
+    Recursively find modal verbs and auxiliaries and mark them
+    """
+    mod, aux, oc, verb = None, None, None, None
     aux_oc_wait = None
 
     # mark mod or wait for aux
     if label == 'm':
-        # print label, phrase(graph, subj), '->', phrase(graph, node)
         mark(graph, subj, node, 'SBM')
     elif label == 'a':
-        # print label, phrase(graph, subj), '->', phrase(graph, node), 'WAIT!'
-
-        # if not OA is a VZ or VVIZU, then ignore it!!! see s277
-        if not any([c for c in child_nodes(graph, node) if c.name == 't' and c['pos'] == 'VVIZU' or c.name == 'nt' and c['cat'] in ['VZ', 'CVZ']]):
+        # if OA is a VZ or VVIZU, then ignore it, it might be a case of raising (see s277),
+        # otherwise, keep it as candidate of auxiliary, but only mark it if it's the end 
+        # of the auxliary verb chain
+        if not any([c for c in child_nodes(graph, node) if c.name == 't' and c['pos'] == 'VVIZU' \
+                                                                or c.name == 'nt' and c['cat'] in ['VZ', 'CVZ']]):
             aux_oc_wait = node
 
-    # check all children of the current node, to find new subj, mod/aux/hd, and oc
+    # check all children of the current node, to find new subj, mod/aux/verb, and oc
     if node.name == 'nt':
         children = child_nodes(graph, node)
-        # print [c['id'] for c in children], '\n'
 
-        # find new subj
+        # first, find new subj, a subject closer to the verb can replace the more distanced one
         new_subj = child_nodes(graph, node, ['SB'], ['SB', 'SBM', 'SBA', 'SBR', 'SBE'])
         if new_subj:
             subj = new_subj[0]
             label = ''
 
-        # find mod/aux/hd, oc
+        # find mod/aux/verb, oc
         for child in children:
             edge_label = get_label(graph, child)
             # mark mod or aux
@@ -181,142 +147,52 @@ def mod_aux_helper(graph, node, subj = None, label = ''):
                 elif child['pos'] in ['VAINF', 'VAFIN', 'VAPP']:
                     aux = child
                 else:
-                    hd = child
-                mod_aux_helper(graph, child)
+                    verb = child
+                # mod_aux_helper(graph, child)
 
-            elif edge_label == 'OC'\
-                    and not (child.name == 'nt' and child['cat'] in ['VZ', 'CVZ']\
-                            or child.name == 't' and child['pos'] == 'VVIZU'):
+            # ?
+            elif edge_label == 'OC' and not (child.name == 'nt' and child['cat'] in ['VZ', 'CVZ']\
+                                             or child.name == 't' and child['pos'] == 'VVIZU'):
                 oc = child
-                # print 4
                 mod_aux_helper(graph, child, subj)
 
             # rest just call helper
             else:
                 mod_aux_helper(graph, child)
 
-        # print '\t',phrase(graph, subj), ',',  phrase(graph, mod) + phrase(graph, aux) ,',',phrase(graph, oc)
-        # do job
         if not label:
             if oc:
-                # print phrase(graph, subj), ',',  phrase(graph, mod) + phrase(graph, aux) ,',',phrase(graph, oc)
-                # black magic here, can replace by call helper several times for each conj 
-                if mod and oc.name == 'nt' and oc['cat'] == 'CVP':
-                    # print 1
-                    mark(graph, subj, oc, 'SBM')
-                else:
-                    if mod:
-                        # print 2
-                        mod_aux_helper(graph, oc, subj, 'm')
-                    elif aux:
-                        # print 3
-                        mod_aux_helper(graph, oc, subj, 'a')
+                # # print phrase(graph, subj), ',',  phrase(graph, mod) + phrase(graph, aux) ,',',phrase(graph, oc)
+                # # black magic here, can replace by call helper several times for each conj 
+                # if mod and oc.name == 'nt' and oc['cat'] == 'CVP':
+                #     # print 1
+                #     mark(graph, subj, oc, 'SBM')
+                # else:
+                if mod:
+                    # print 2
+                    mod_aux_helper(graph, oc, subj, 'm')
+                elif aux:
+                    # print 3
+                    mod_aux_helper(graph, oc, subj, 'a')
 
-    # if it's an aux at the end of the head chain, then mark it, otherwise search deeper
+    # if it's an aux at the end of the chain, then mark it, otherwise search deeper
     if aux_oc_wait:
-        if hd or mod or not oc:
+        if verb or mod or not oc:
             mark(graph, subj, aux_oc_wait, 'SBA')
         elif aux:
             mod_aux_helper(graph, oc, subj, 'a')
 
 
-# original mod_aux_helper
-
-def mod_aux_helper0(graph, node, subj = None, label = ''):
-    mod, aux, oc, hd = None, None, None, None
-
-    if node.name == 'nt':
-        children = child_nodes(graph, node)
-        # print [c['id'] for c in children], '\n'
-        new_subj = child_nodes(graph, node, ['SB'], ['SB'])
-        if new_subj:
-            subj = new_subj[0]
-            label = ''
-
-        # find mod, aux, oc
-        for child in children:
-            edge_label = get_label(graph, child)
-            # mark mod or aux
-            if edge_label == 'HD' and child.name == 't':
-                if child['pos'] in ['VMINF', 'VMFIN', 'VMPP']:
-                    mod = child
-                elif child['pos'] in ['VAINF', 'VAFIN', 'VAPP']:
-                    aux = child
-                else:
-                    hd = child
-            elif edge_label == 'OC'\
-                    and not (child.name == 'nt' and child['cat'] in ['VZ', 'CVZ']\
-                            or child.name == 't' and child['pos'] == 'VVIZU'):
-                oc = child
-                # print phrase(graph, oc)
-            # rest just call helper
-            # else:
-            mod_aux_helper(graph, child, subj)
-
-        print '\t',phrase(graph, subj), ',',  phrase(graph, mod) + phrase(graph, aux) ,',',phrase(graph, oc)
-        # do job
-        if not label:
-            if oc:
-                print phrase(graph, subj), ',',  phrase(graph, mod) + phrase(graph, aux) ,',',phrase(graph, oc)
-                # black magic here, can replace by call helper several times for each conj 
-                if mod and oc.name == 'nt' and oc['cat'] == 'CVP':
-                    print 1
-                    mark(graph, subj, oc, 'SBM')
-                else:
-                    if mod:
-                        print 2
-                        mod_aux_helper(graph, oc, subj, 'm')
-                    elif aux:
-                        print 3
-                        mod_aux_helper(graph, oc, subj, 'a')
-        elif label == 'm':
-            # print phrase(graph, subj)
-            # print phrase(graph, oc)
-            if aux:
-                if oc:
-                    mod_aux_helper(graph, oc, subj, 'm')
-                else:
-                    mark(graph, subj, aux, 'SBM')
-            elif mod:
-                # print phrase(graph, subj)
-                # print phrase(graph, mod)
-                mark(graph, subj, mod, 'SBM')
-                if oc:
-                    mod_aux_helper(graph, oc, subj, 'm')
-            elif hd:
-                mark(graph, subj, hd, 'SBM')
-        elif label == 'a':
-            if aux:
-                if oc:
-                    mod_aux_helper(graph, oc, subj, 'a')
-                else:
-                    mark(graph, subj, aux, 'SBA')
-            elif mod:
-                mark(graph, subj, mod, 'SBA')
-                if oc:
-                    mod_aux_helper(graph, oc, subj, 'm')
-            elif hd:
-                mark(graph, subj, hd, 'SBA')
-        else:
-            print 'what?'
-    else:
-        if label == 'm':
-            mark(graph, subj, node, 'SBM')
-        elif label == 'a':
-            mark(graph, subj, node, 'SBA')
-
-
-
-
 
 #####################################
 
 
 #####################################
-# step 2 and 3: add secedge to SBR and SBE
+# 
 def ctrl_helper(graph, items, flag):
-    global TOTAL, EXCEPTION, COLLECTION, STAT
-
+    """
+    step 2 and 3: add secedge to SBR and SBE
+    """
     sid, ctrl_type, ctrl_indices, main_indices, comp_indices = items
 
     lfg_main_set = set_without_punctuation(graph, main_indices)
@@ -327,7 +203,7 @@ def ctrl_helper(graph, items, flag):
     comp, ctrl, main = None, None, None
 
     # first find comp, then ctrl
-    comp = find_comps(graph, lfg_comp_set)
+    comp = find_comp(graph, lfg_comp_set)
     # print comp
     if comp:
         comp_set = range_of_phrase(graph, comp)
@@ -340,53 +216,29 @@ def ctrl_helper(graph, items, flag):
             print phrase(graph, main)
             # print phrase(graph, comp)
 
+        # ?
         main_parent_oc_sets = map(lambda x: range_of_phrase(graph, x), child_nodes(graph, parent_node(graph, main), ['OC', 'OP', 'MO', 'PD']))
         if not any(comp_set <= s for s in main_parent_oc_sets):
             print 'exception:', sid
-            EXCEPTION += 1
             return
 
         if flag == '-r':
-            seclabel, excl = 'SBR', 'EXCL'
-            ctrl, num = find_subj(graph, comp, main)
+            label = 'SBR'
+            ctrl = find_subj(graph, comp, main)
         else:
-            seclabel, excl = 'SBE', 'EXCLE'
-            ctrl, num = find_ctrl(graph, lfg_ctrl_set, comp, main, ctrl_type)
+            label = 'SBE'
+            ctrl = find_ctrl(graph, lfg_ctrl_set, comp, main, ctrl_type)
 
         if ctrl:   
-            TOTAL += 1
             ctrl_set = range_of_phrase(graph, ctrl)
-            if not lfg_ctrl_set & ctrl_set:
-                # FORTH += 1
-                num = 4
-
+            # two sets not contain each other
+            # in other words, a node cannot attached to its ancestor, vice versa
             if not ctrl_set <= comp_set and not comp_set <= ctrl_set:
-                mark(graph, ctrl, comp, seclabel)
+                mark(graph, ctrl, comp, label)
             else:
                 print 'exception:', sid
-                EXCEPTION += 1
-                # add into collection
-            # if collect:
-                # do sth
-
-
-            if not any(a == b for a in range_of_phrase(graph, ctrl) for b in lfg_ctrl_set):
-                if flag == '-r':
-                    STAT['NOR'] += 1
-                else:
-                    STAT['NOE'] += 1
-
-            if not any(a == b for a in range_of_phrase(graph, comp) for b in lfg_comp_set):
-                STAT['NOC'] += 1
-
-            if not any(a == b for a in range_of_phrase(graph, main) for b in lfg_main_set):
-                STAT['NOM'] += 1
-
 
         else:
-            # if not comp: 
-            #     print '-----COMP Not Found-----\t',sid
-            # else:
             print '-----CTRL Not Found-----\t',sid
     if not comp:
         print '-----COMP Not Found-----\t',sid 
@@ -398,45 +250,36 @@ def ctrl_helper(graph, items, flag):
 #####################################
 # functions to find specific nodes 
 
+
 def find_ctrl(graph, lfg_ctrl_set, comp, main, ctrl_type):
-    obj = None
-    real_main, real_comp = main, comp
-    subj, num = find_subj(graph, comp, main)
+    """
+    find controller, namely subject or object.
+    argument ctrl_type is not used, which is part of the result from LFG, not very reliable
+    here simply uses the heuristics that if there is an object which is not reflexive pronoun,
+    then select it as the controller, otherwise select the subject.
+    in experiment can combine the heuristics and ctrl_type to make a conservative choice
+    by only assign the cases where they agree, otherwise discard. 
+    """
+    subj = find_subj(graph, comp, main)
     if main and comp:
-        # top = parent_node(graph, main)
-        # # locate the real comp as bottom for search of OA
-        # if get_label(graph, comp) in ['OC', 'CJ', 'RE']:
-        #     bottom = comp
-        # elif get_label(graph, comp) in ['HD']:
-        #     bottom = parent_node(graph, comp)
-        #     real_comp = bottom
-        # else:
-        #     bottom = None
-        #     print 'Warning: label of comp is %s' % get_label(graph, comp)
-        # while bottom and top and not obj and top != bottom:
-        #     tmp = child_node(graph, top, ['HD'])
-        #     if tmp:
-        #         real_main = tmp
-        #     obj = child_node(graph, top, ['OA', 'DA'])
-        #     top = child_node(graph, top, ['OC', 'PD'])
-        #     # print 'top',top
-
-        # print phrase(graph, real_main)
-        # if find a object which is not a reflexive pronoun, then return it as the ctrl
-        # if ctrl_type == 'o' and not obj:
-        #     do sth
-
         obj = child_node(graph, parent_node(graph, main), ['OA', 'DA'])
 
         if obj and (obj.name == 'nt' or obj['pos'] != 'PRF'):
-            write_results('o', graph, obj, real_main, real_comp)
-            return obj, 4
+            write_results('o', graph, obj, main, comp)
+            return obj
         elif subj:
-            write_results('s', graph, subj, real_main, real_comp)
-            return subj, num
-    return None, -1
+            write_results('s', graph, subj, main, comp)
+            return subj
+    return None
+
+
 
 def find_real_main_comp(graph, main, comp):
+    """
+    !!!!!!
+    find the real main verb and comp, given those from LFG
+    little bit messy, try to leave it and see if anything changes    
+    """
     # obj = None
     real_main, real_comp = main, comp
     if main and comp:
@@ -461,9 +304,10 @@ def find_real_main_comp(graph, main, comp):
 
 
 def find_subj(graph, comp, main):
-    global FIRST, SECOND, THIRD
-    main_subj = None
-    # zero
+    """
+    find the subject of the main verb
+    including secondary edges of verb complement or main verb
+    """
     tmp = comp
     edge_sb = tmp.find(lambda x: x.name == 'edge' and x['label'] in ['SB'])
     secedge_sb = graph.find(lambda x: x.name == 'secedge' and x['label'].startswith('SB') and x['idref'] == tmp['id'])
@@ -476,45 +320,23 @@ def find_subj(graph, comp, main):
             secedge_hd_sb = graph.find(lambda x: x.name == 'secedge' and x['label'].startswith('SB') and x['idref'] == edge_hd['idref'])
         tmp = parent_node(graph, tmp)
 
-
     if edge_sb:
-        ctrl = graph.find(lambda x: x.name in ['t', 'nt'] and x['id'] == edge_sb['idref'])
-        FIRST += 1
-        return ctrl, 1
+        return graph.find(lambda x: x.name in ['t', 'nt'] and x['id'] == edge_sb['idref'])
     if secedge_sb:
-        ctrl = secedge_sb.parent
-        SECOND += 1
-        return ctrl, 2
+        return secedge_sb.parent
     if secedge_hd_sb:
-        ctrl = secedge_hd_sb.parent
-        THIRD += 1
-        return ctrl, 3
-    return None, 0
-
-
-def find_obj(graph, ctrl_set, main):
-    global FORTH
-    # print words_of_phrase(graph, main)
-    main_obj = None
-    if main:
-        p = parent_node(graph, main)
-        # print main['word']
-        while p and not main_obj:
-            main_obj = child_node(graph, p, ['OA'])
-            # secedge_sb = graph.find(lambda x: x.name == 'secedge' and x['label'] in ['OA'] and x['idref'] == p['id'])
-            # if secedge_sb:
-            #     main_obj = secedge_sb.parent
-            p = child_node(graph, p, ['OC'])
-    if main_obj:
-        FORTH += 1
-        return main_obj, 4
+        return secedge_hd_sb.parent
+    return None
 
 
 
-def find_comps(graph, comp_set):
+def find_comp(graph, comp_set):
+    """
+    find the phrase of the verb complement 
+    """
     cands = []
     comp = None
-    # coor_comps = []
+
     for t in graph.terminals:
         if type(t) == bs4.element.Tag:
             s = range_of_phrase(graph, t)
@@ -532,32 +354,25 @@ def find_comps(graph, comp_set):
             parent = parent_node(graph, comp)
             if get_label(graph, parent) in ['OC', 'PD']:
                 comp = parent
-        # if comp.name == 'nt' and comp['cat'] in ['CVP', 'CVZ']:
-        #     coor_comps = child_nodes(graph, comp, ['CJ'])
-        # else:
-        #     coor_comps = [comp]
-
     return comp
 
 
 
 
 def find_main(graph, main_set):
+    """
+    find the main verb phrase of the controll construction 
+    """
     m, ans = None, None
-    # int(x['idref'].split('_')[1]
-    # print main_set
     edge_cands = graph.find_all(lambda x: x.name == 'edge' and x['label'] == 'HD' and range_of_phrase(graph, x) <= main_set)
     if edge_cands:
-        ed = edge_cands[0]
-        ans = graph.find(lambda x: x.name in ['t', 'nt'] and x['id'] == ed['idref'])
-        # print 1, ans
+        edge = edge_cands[0]
+        ans = graph.find(lambda x: x.name in ['t', 'nt'] and x['id'] == edge['idref'])
         if len(edge_cands) > 1:
             for e in edge_cands[1:]:
-                # print e
                 m = graph.find(lambda x: x.name in ['t', 'nt'] and x['id'] == e['idref'])
                 if m and range_of_phrase(graph, m) <= main_set and m not in parent_node(graph, ans):
                     ans = m
-                    # print 2, ans
     else:
         print 'oops, no main'
     return ans
@@ -744,19 +559,14 @@ def write_collection(collection_name):
 #####################################
 # playground
 
-
 def ctrl_without_lfg(graph, node, subj = None, label = ''):
-    global FIRST
     if node.name == 'nt':
         children = child_nodes(graph, node)
         # find new subj
         new_subj = child_nodes(graph, node, ['SB'], ['SB', 'SBM', 'SBA', 'SBR', 'SBE'])
         if new_subj:
             subj = new_subj[0]
-
-
         if subj:
-
             obj = child_node(graph, node, ['DA', 'OA']) # sequence matters! 
             if obj.name == 't' and obj['pos'] == 'PRF':
                 obj = None
@@ -824,10 +634,6 @@ def ctrl_without_lfg(graph, node, subj = None, label = ''):
                                     mark(graph, subj, re_of_mo, 'SBC')
 
 
-
-
-
-
             # for all other possible ctrl, ignored for now, but quite important
             # oc = child_node(graph, node, ['OC'])
             # if oc and (oc.name == 'nt' and oc['cat'] in ['VP', 'CVP', 'VZ','CVZ'] or oc.name == 't' and oc['pos'] == 'VVIZU')\
@@ -835,8 +641,6 @@ def ctrl_without_lfg(graph, node, subj = None, label = ''):
             #     print 'OC', int(node['id'].split('_')[0][1:])
             #     mark(graph, subj, oc, 'SBU')
             #     FIRST += 1
-
-
 
 
         # find other 
@@ -878,65 +682,6 @@ def vz_no_edge(graph):
 
 
 
-
-
-
-# stats about control verbs
-def ctrl_finder_helper(graph, node, subj = None):
-    global MISSED, ALL
-    oc, hd = None, None
-    # print node['id'],
-    if node.name == 'nt':
-        children = child_nodes(graph, node)
-        # print [c['id'] for c in children], '\n'
-        new_subj = child_nodes(graph, node, ['SB'])
-        if new_subj:
-            subj = new_subj[0]
-            # label = ''
-
-        # find hd, oc
-        for child in children:
-            edge_label = get_label(graph, child)
-            # mark mod or aux
-            if edge_label == 'HD' and child.name == 't':
-                if child['pos'] not in ['VMINF', 'VMFIN', 'VMPP', 'VAINF', 'VAFIN', 'VAPP']:
-                    hd = child
-            elif edge_label == 'OC' and not (child.name == 'nt' and child['cat'] in ['S', 'CS']):
-                oc = child
-            # rest just call helper
-            else:
-                ctrl_finder_helper(graph, child)
-
-        if oc:
-            ctrl_finder_helper(graph, oc, subj)
-
-    if subj and hd and oc:
-        # lemma of hd
-        while hd.name != 't':
-            hd = child_node(graph, hd, ['HD'])
-
-        svp = child_node(graph, parent_node(graph, hd), ['SVP'])
-
-        hd_lemma = hd['lemma'].encode('utf-8')
-        if svp:
-            hd_lemma = svp['lemma'].encode('utf-8') + hd_lemma
-        # print hd_lemma
-
-        if hd_lemma not in ALL:
-            ALL[hd_lemma] = []
-        ALL[hd_lemma].append(subj['id'].split('_')[0][1:])
-
-        oa = child_node(graph, parent_node(graph, subj), ['OA', 'DA'])
-        if not has_secedge(graph, subj, oc) and not (oa and has_secedge(graph, oa, oc)):
-            print subj['id'].split('_')[0][1:], phrase(graph, subj), '-->', phrase(graph, hd), '-->', phrase(graph, oc)
-            if hd_lemma not in MISSED:
-                MISSED[hd_lemma] = []
-            MISSED[hd_lemma].append(subj['id'].split('_')[0][1:])
-
-
-
-
-
 def has_secedge(graph, fr, to):
     edges = fr.find_all('secedge')
     hd_bottom = child_node(graph, to, ['HD'])
@@ -960,10 +705,9 @@ def incomming_secedge(graph, node):
 #####################################
 
 
-
 if __name__ == '__main__':
     if debug == 0:
-        walk('../TIGER/tiger5.0.xml','../TIGER/tiger8.3.3.xml', 'raising_indices.txt', 'equi_indices.txt')
+        walk('../TIGER/tiger5.0.xml','../TIGER/tiger9.1.1.xml', 'raising_indices.txt', 'equi_indices.txt')
     elif debug == 1:
         test('../TIGER/tiger5.0.xml',  'raising_indices.txt', 'equi_indices.txt', sid)
     elif debug == 2:

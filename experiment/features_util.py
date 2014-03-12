@@ -197,7 +197,7 @@ def make_verb_feature_vector(useful_tokens, verb, sentence, mapfunc):
     root_path_label = map(lambda x: skip_conj_label(sentence, x), root_path)
 
 
-    features.append(mapfunc('SELF.LEMMA:%s' % verb.lemma)) #?
+    # features.append(mapfunc('SELF.LEMMA:%s' % verb.lemma)) # decresed the accuracy, try embed brown cluster
 
     # POS and label of the path to root
     features.append(mapfunc('PATH.POS:%s' % '_'.join(root_path_pos)))
@@ -205,8 +205,8 @@ def make_verb_feature_vector(useful_tokens, verb, sentence, mapfunc):
 
 
     # prefixes of path to root
-    features.append(mapfunc('PATH.P1.POS:%s' % root_path_pos[0])) #?
-    features.append(mapfunc('PATH.P2.POS:%s' % '_'.join((root_path_pos + ['--'])[:2]))) #?
+    # features.append(mapfunc('PATH.P1.POS:%s' % root_path_pos[0])) #?
+    # features.append(mapfunc('PATH.P2.POS:%s' % '_'.join((root_path_pos + ['--'])[:2]))) #?
     features.append(mapfunc('PATH.P1.LABEL:%s' % root_path_label[0]))
     features.append(mapfunc('PATH.P2.LABEL:%s' % '_'.join((root_path_label + ['--'])[:2])))
     # features.append(mapfunc('PATH.F3.LABEL:%s' % '_'.join((root_path_label + ['--', '--'])[:3])))
