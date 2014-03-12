@@ -305,7 +305,7 @@ def find_real_main_comp(graph, main, comp):
 
 def find_subj(graph, comp, main):
     """
-    find the subject of the main verb
+    find the subject of the main verb,
     including secondary edges of verb complement or main verb
     """
     tmp = comp
