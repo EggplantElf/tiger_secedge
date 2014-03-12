@@ -21,30 +21,6 @@ def diff(file1, file2, output_file):
             g.write(corpus1[i])
             g.write(corpus2[i])
 
-
-
-            # sent1 = bs4.BeautifulSoup(corpus1[i], 'xml')
-            # sent2 = bs4.BeautifulSoup(corpus2[i], 'xml')
-            # t1, t2, nt1, nt2 = [], [], [], []
-            # for t in sent1.graph.terminals:
-            #     if type(t) == bs4.element.Tag:
-            #         t1.append(t)
-            # for t in sent2.graph.terminals:
-            #     if type(t) == bs4.element.Tag:
-            #         t2.append(t)            
-            # for nt in sent1.graph.nonterminals:
-            #     if type(nt) == bs4.element.Tag:
-            #         nt1.append(nt)
-            # for nt in sent2.graph.nonterminals:
-            #     if type(nt) == bs4.element.Tag:
-            #         nt2.append(nt) 
-
-            # for x in range(len(t1)):
-            #     if t1[x] = t2[x]
-
-
-
-
     g.write('</body>\r\n</corpus>\r\n')
     g.close()
 
