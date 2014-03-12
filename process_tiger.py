@@ -2,16 +2,13 @@
 # -*- coding: utf-8 -*-
 
 
-import bs4, os, re
+import bs4, sys, re
 debug = 0
 sid = 17
 
-TOTAL, EXCEPTION = 0, 0
 STEP = '1'
 STAT = {'SBM': 0, 'SBA': 0, 'SBR': 0, 'SBE': 0, 'SBC': 0, 'SBU': 0}
-MISSED = {}
-ALL = {}
-COLLECTION = ''
+
 
 #####################################
 # walk through all sents or debug
@@ -107,7 +104,6 @@ def process(graph, raising_dic, equi_dic):
 
 #####################################
 
-
 def mod_aux_helper(graph, node, subj = None, label = ''):
     """
     step 1: add secedge to SBA and SBM
@@ -188,7 +184,7 @@ def mod_aux_helper(graph, node, subj = None, label = ''):
 
 
 #####################################
-# 
+
 def ctrl_helper(graph, items, flag):
     """
     step 2 and 3: add secedge to SBR and SBE
@@ -265,10 +261,10 @@ def find_ctrl(graph, lfg_ctrl_set, comp, main, ctrl_type):
         obj = child_node(graph, parent_node(graph, main), ['OA', 'DA'])
 
         if obj and (obj.name == 'nt' or obj['pos'] != 'PRF'):
-            write_results('o', graph, obj, main, comp)
+            # write_results('o', graph, obj, main, comp)
             return obj
         elif subj:
-            write_results('s', graph, subj, main, comp)
+            # write_results('s', graph, subj, main, comp)
             return subj
     return None
 
@@ -305,7 +301,7 @@ def find_real_main_comp(graph, main, comp):
 
 def find_subj(graph, comp, main):
     """
-    find the subject of the main verb,
+    find the subject of the main verb
     including secondary edges of verb complement or main verb
     """
     tmp = comp
@@ -327,7 +323,6 @@ def find_subj(graph, comp, main):
     if secedge_hd_sb:
         return secedge_hd_sb.parent
     return None
-
 
 
 def find_comp(graph, comp_set):
@@ -542,17 +537,6 @@ def write_soup(output_name, text):
     g.write(text)
     g.close()
 
-def write_collection(collection_name):
-    global COLLECTION
-    # COLLECTION = COLLECTION.encode('utf-8')
-    text = open('../TIGER/head.xml').read()
-    text += '<body>\r\n'
-    text += COLLECTION
-    text += '</body>\r\n</corpus>\r\n'
-    g = open(collection_name, 'w')
-    g.write(text)
-    g.close()
-
 #####################################
 
 
@@ -706,14 +690,15 @@ def incomming_secedge(graph, node):
 
 
 if __name__ == '__main__':
-    if debug == 0:
-        walk('../TIGER/tiger5.0.xml','../TIGER/tiger9.1.1.xml', 'raising_indices.txt', 'equi_indices.txt')
-    elif debug == 1:
-        test('../TIGER/tiger5.0.xml',  'raising_indices.txt', 'equi_indices.txt', sid)
-    elif debug == 2:
-        walk('../TIGER/tiger7.5.5.xml','../TIGER/test.xml', 'raising_indices.txt', 'equi_indices.txt')
-    elif debug == 3:
-        test('../TIGER/tiger7.5.5.xml',  'raising_indices.txt', 'equi_indices.txt', sid)
+    # if debug == 0:
+    #     walk('../TIGER/tiger5.0.xml','../TIGER/tiger9.1.1.xml', 'raising_indices.txt', 'equi_indices.txt')
+    # elif debug == 1:
+    #     test('../TIGER/tiger5.0.xml',  'raising_indices.txt', 'equi_indices.txt', sid)
 
+    if len(sys.argv) == 6:
+        STEP = sys.argv[5]
+        walk(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+    else:
+        print 'args: [input_file] [output_file] [rasing_file] [equi_file] [step]'
         
 
