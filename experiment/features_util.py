@@ -29,8 +29,6 @@ class Token(object):
         self.entries = entries
 
     def to_line(self):
-        # if self.entries[14] != '_' and 'SBC' in self.entries[14].split('|'):
-        #     print '\t'.join(self.entries)
         return '\t'.join(self.entries)
 
 
@@ -52,23 +50,27 @@ class Root(Token):
 
 
 def update_label(token1, token2, label):
+    """
+    Update the output entries of a token, if it is assigned a new label
+    used in mapping the prediction back to original conll data
+    """
     if label:
         token1.sec_subj[token2] = label
         for (k, v) in token2.sec_heads.items():
             if k == token1.tid:
-                # print token2.sec_heads
                 token2.sec_heads[k] = label
         # premise: index also sorted in original file
         if token2.sec_heads:
             token2.entries[12] = '|'.join([t for (t, l) in sorted(token2.sec_heads.items(), key = lambda x: int(x[0]))])
             token2.entries[14] = '|'.join([l for (t, l) in sorted(token2.sec_heads.items(), key = lambda x: int(x[0]))])
-        else:
-            token2.entries[12] = '_'
-            token2.entries[14] = '_'
-        # print '\t'.join(token2.entries)
+
 
 
 def postprocess_tokens(sentence, label_filter = None):
+    """
+    After reading a sentence, add links to head, dependants and secondary dependency into each token
+    Only add specific secondary dependencies, if there is a filter for label
+    """
     for token in sentence:
         # find the head of the token and add the token into the deps of it's head
         if token.head != 0:
@@ -163,11 +165,15 @@ def write_to_file( label, features, fileobj ):
     features.discard(None)
     print >> fileobj, '%d %s' % (label,' '.join(map(lambda x: '%d:1' % x,sorted(features))))
 
+# save some usful tokens in a dictionary to use later
 def get_useful_tokens(verb, sentence):
     dic = {}
+    # head, head's head, and head's head's head
     dic['HEAD1'] = skip_conj_head(sentence, verb, 1)
     dic['HEAD2'] = skip_conj_head(sentence, verb, 2)
     dic['HEAD3'] = skip_conj_head(sentence, verb, 3)
+
+    # subject, direct object, dative object, and prepositional object on each head
     dic['HEAD1.SB'] = get_token_by_path(sentence, dic['HEAD1'], ['SB'])
     dic['HEAD1.OA'] = get_token_by_path(sentence, dic['HEAD1'], ['OA'])
     dic['HEAD1.DA'] = get_token_by_path(sentence, dic['HEAD1'], ['DA'])
@@ -180,30 +186,43 @@ def get_useful_tokens(verb, sentence):
     dic['HEAD3.OA'] = get_token_by_path(sentence, dic['HEAD3'], ['OA'])
     dic['HEAD3.DA'] = get_token_by_path(sentence, dic['HEAD3'], ['DA'])
     dic['HEAD3.OP.NK'] = get_token_by_path(sentence, dic['HEAD3'], ['OP', 'NK'])
-
     return dic
 
 
+# Make features for candidates of a verb in a sencondary dependency
 def make_verb_feature_vector(useful_tokens, verb, sentence, mapfunc):   
     features = []
     root_path = chain_to_root(sentence, verb)
+    root_path_pos = map(lambda x: x.pos, root_path)
     root_path_label = map(lambda x: skip_conj_label(sentence, x), root_path)
-    features.append(mapfunc('PATH.POS:%s' % '_'.join(map(lambda x: x.pos, root_path))))
+
+
+    features.append(mapfunc('SELF.LEMMA:%s' % verb.lemma)) #?
+
+    # POS and label of the path to root
+    features.append(mapfunc('PATH.POS:%s' % '_'.join(root_path_pos)))
     features.append(mapfunc('PATH.LABEL:%s' % '_'.join(root_path_label)))
 
-    features.append(mapfunc('PATH.F1.LABEL:%s' % root_path_label[0]))
-    features.append(mapfunc('PATH.F2.LABEL:%s' % '_'.join((root_path_label + ['--'])[:2])))
+
+    # prefixes of path to root
+    features.append(mapfunc('PATH.P1.POS:%s' % root_path_pos[0])) #?
+    features.append(mapfunc('PATH.P2.POS:%s' % '_'.join((root_path_pos + ['--'])[:2]))) #?
+    features.append(mapfunc('PATH.P1.LABEL:%s' % root_path_label[0]))
+    features.append(mapfunc('PATH.P2.LABEL:%s' % '_'.join((root_path_label + ['--'])[:2])))
     # features.append(mapfunc('PATH.F3.LABEL:%s' % '_'.join((root_path_label + ['--', '--'])[:3])))
 
-
+    # whether the verb is infinitive with zu
     features.append(mapfunc('ZU_INF:%s' % (verb.pos == 'VVIZU' or get_token_by_path(sentence, verb, ['PM']) != None)))
-    features.append(mapfunc('SELF.OC:%s' % get_pos(get_token_by_path(sentence, verb, ['OC']))))
+    # POS of the verb's OC dependant if there is one
+    features.append(mapfunc('SELF.OC.POS:%s' % get_pos(get_token_by_path(sentence, verb, ['OC']))))
 
+    # lemmas of the heads
     features.append(mapfunc('HEAD1.LEMMA:%s' % get_lemma(useful_tokens['HEAD1'])))
     features.append(mapfunc('HEAD2.LEMMA:%s' % get_lemma(useful_tokens['HEAD2'])))
     features.append(mapfunc('HEAD3.LEMMA:%s' % get_lemma(useful_tokens['HEAD3'])))
 
 
+    # POS of the heads and their dependants
     features.append(mapfunc('HEAD1:%s' % get_pos(useful_tokens['HEAD1'])))
     features.append(mapfunc('HEAD1.SB:%s' % get_pos(useful_tokens['HEAD1.SB'])))
     features.append(mapfunc('HEAD1.OA:%s' % get_pos(useful_tokens['HEAD1.OA'])))
@@ -225,7 +244,8 @@ def make_verb_feature_vector(useful_tokens, verb, sentence, mapfunc):
     return features
 
 
-
+# Make features for candidates of a subject in a secondary dependency 
+# (not necessary to be a noun, just easier to understand)
 def make_noun_feature_vector(useful_tokens, noun, sentence, mapfunc):
     features = []
     features.append(mapfunc('NOUN_POS:%s' % noun.pos))
@@ -245,7 +265,9 @@ def make_noun_feature_vector(useful_tokens, noun, sentence, mapfunc):
     return features
 
 
-
+# Return the path of tokens from a given token(incl.) to root(excl.), skipping dependency of conjunctions
+# e.g. a path "ROOT --> Verb -OA-> Noun1 -CJ-> Noun2 -CD-> und -CJ-> Noun3", 
+# chain_to_root(sentence, Noun3) will return [Noun3, Verb]
 def chain_to_root(sentence, token):
     # skip the CJ/CD nodes
     chain = []
@@ -254,6 +276,8 @@ def chain_to_root(sentence, token):
         token = skip_conj_head(sentence, token)
     return chain
 
+# Return the head of a given token, skipping dependency of conjunctions
+# setting a level higher than 1 can get the ancestor of the token
 def skip_conj_head(sentence, token, level = 1):
     # print token.pos
     for i in range(level):
@@ -264,17 +288,19 @@ def skip_conj_head(sentence, token, level = 1):
             break
     return token
 
-def skip_conj_self(sentence, token):
-    while token.label in ['CD', 'CJ']:
-        token = token.head
 
+# Return the label of the token to its head, skipping dependency of conjunctions
 def skip_conj_label(sentence, token):
     while token.label in ['CD', 'CJ']:
         token = token.head
     return token.label
 
 
-# need change
+# Return the first matching token of a start token and a path
+# e.g. get_token_by_path(sentence, token, ['OP', 'NK'] means
+# the NK dependant of the OP dependant of the given token
+# Doesn't handle multiple matches and conjuncts(and mostly shouldn't), 
+# but for our purpose it works in general
 def get_token_by_path(sentence, token, path):
     for label in path:
         token = [d for d in token.deps if d.label == label]
@@ -284,23 +310,14 @@ def get_token_by_path(sentence, token, path):
             token = token[0]
     return token
 
-def get_token_by_path_new(sentence, token, path):
-    res = []
-    label = path[0]
-    for label in path:
-        token = [d for d in token.deps if d.label == label]
-        if not token:
-            return None
-        else:
-            token = token[0]
-    return token
-
+# Return the POS tag of a token
 def get_pos(token):
     if token:
         return token.pos
     else:
         return '-NONE-'
 
+# Return the lemma of a token
 def get_lemma(token):
     if token:
         return token.lemma
