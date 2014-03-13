@@ -129,7 +129,7 @@ def find_equi(filename):
                     print v, varis[v]
                     print ctrl, varis[ctrl]
                     print vcomp, varis[vcomp]
-                print filename
+                # print filename
                 ctrl_phrase = phrase_of_var(ctrl)
                 vcomp_phrase = phrase_of_var(vcomp)
                 main_phrase = rest_of_phrase(phrase_of_var(v), ctrl_phrase, vcomp_phrase)

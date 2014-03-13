@@ -68,6 +68,9 @@ def walk(input_file, output_file, raising_file, equi_file, start = 0, end = 6000
 def process(graph, raising_dic, equi_dic):
     root = root_node(graph)
     sid = int(root['id'].split('_')[0][1:])
+    if sid %2000 == 0:
+        print '.',
+
 
     # step 1: find SBM, SBA
     if '1' in STEP:
@@ -561,7 +564,8 @@ def ctrl_without_lfg(graph, node, subj = None, label = ''):
                 oc_of_oa = child_node(graph, oa, ['OC', 'RE', 'MNR'])
                 if oc_of_oa:
                     if oc_of_oa.name == 'nt':
-                        if oc_of_oa['cat'] in ['VP', 'CVP', 'VZ', 'CVZ'] and not child_node(graph, oc_of_oa, ['SB'], ['SB', 'SBM', 'SBA', 'SBR', 'SBE']):
+                        if oc_of_oa['cat'] in ['VP', 'CVP', 'VZ', 'CVZ'] \
+                            and not child_node(graph, oc_of_oa, ['SB'], ['SB', 'SBM', 'SBA', 'SBR', 'SBE']):
                             print 'OA', int(node['id'].split('_')[0][1:])
                             if obj and obj != oa:
                                 print 'OBJ marked'
@@ -583,7 +587,8 @@ def ctrl_without_lfg(graph, node, subj = None, label = ''):
                 oc_of_pd = child_node(graph, pd, ['OC'])
                 if oc_of_pd:
                     if oc_of_pd.name == 'nt':
-                        if oc_of_pd['cat'] in ['VP', 'CVP', 'VZ', 'CVZ'] and not child_node(graph, oc_of_pd, ['SB'], ['SB', 'SBM', 'SBA', 'SBR', 'SBE']):
+                        if oc_of_pd['cat'] in ['VP', 'CVP', 'VZ', 'CVZ'] \
+                            and not child_node(graph, oc_of_pd, ['SB'], ['SB', 'SBM', 'SBA', 'SBR', 'SBE']):
                             print 'PD', int(node['id'].split('_')[0][1:])
 
                             mark(graph, subj, oc_of_pd, 'SBC')
@@ -600,8 +605,9 @@ def ctrl_without_lfg(graph, node, subj = None, label = ''):
                     re_of_mo = child_node(graph, mo, ['RE'])
                     if re_of_mo:
                         if re_of_mo.name == 'nt':
-                            if re_of_mo['cat'] in ['VP', 'CVP', 'VZ', 'CVZ'] and not child_node(graph, re_of_mo, ['SB'], ['SB', 'SBM', 'SBA', 'SBR', 'SBE'])\
-                            and not child_node(graph, re_of_mo, ['CP']):
+                            if re_of_mo['cat'] in ['VP', 'CVP', 'VZ', 'CVZ'] \
+                                and not child_node(graph, re_of_mo, ['SB'], ['SB', 'SBM', 'SBA', 'SBR', 'SBE'])\
+                                and not child_node(graph, re_of_mo, ['CP']):
                                 print 'MO', int(node['id'].split('_')[0][1:])
                                 if obj and obj != oa:
                                     print 'OBJ marked'

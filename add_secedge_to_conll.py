@@ -27,7 +27,7 @@ def add_secedge(conll_file, xml_file, output_file, flag):
             conll_dic[sid] = lines
             lines = ''
 
-    for i in conll_dic.keys():
+    for i in sorted(conll_dic.keys()):
         if i in xml_dic:
             g.write(process(xml_dic[i], conll_dic[i], flag))
         # else:
