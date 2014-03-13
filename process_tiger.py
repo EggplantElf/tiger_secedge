@@ -699,6 +699,6 @@ if __name__ == '__main__':
         STEP = sys.argv[5]
         walk(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
     else:
-        print 'args: [input_file] [output_file] [rasing_file] [equi_file] [step]'
+        print 'args: [input_file] [output_file] [rasing_file] [equi_file] [steps]'
         
 

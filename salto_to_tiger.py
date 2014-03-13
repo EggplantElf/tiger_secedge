@@ -1,7 +1,7 @@
 import sys, re, bs4
 
 
-def convert(salto_input, tiger_input, tiger_output):
+def convert(salto_input, tiger_input, head_file,tiger_output):
     edge_from_frames = {}
     pattern = re.compile(r'<frame name=.{5,15} id=.{5,15}>.*?</frame>\r\n', re.DOTALL)
     frames = pattern.findall(open(salto_input).read())
@@ -25,7 +25,7 @@ def convert(salto_input, tiger_input, tiger_output):
     print 'done', len(corpus)
 
     g = open(tiger_output, 'w')
-    g.write(open('../TIGER/head.xml').read())
+    g.write(open(head_file).read())
     g.write('<body>\r\n')
 
     i = 0
@@ -58,4 +58,4 @@ def convert_entity(s):
 
 
 if __name__ == '__main__':
-    convert(sys.argv[1], sys.argv[2], sys.argv[3])
+    convert(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])

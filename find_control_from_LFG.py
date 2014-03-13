@@ -2,25 +2,22 @@
 import sys, os, re
 
 debug = 0
-testid = 10501
-
-
 varis = {}
 words = []
 pattern1 = re.compile(r'cf\(1,(?:eq|in_set)\(.+\)\)')
 pattern2 = re.compile(r'((?:fspan|surfaceform)\(.+\))\)')
 punctuations = ['``', '\'\'', ',', '.', '_,', ':', ';', '-', '(',')', '\'', '/', '?', '...', '!', '`']
 
-def walk(dir, flag):
+def walk(flag, input_dir, output_dir):
     global words
     if flag == '-r':
-        g = open('raising_words.txt', 'w')
-        h = open('raising_indices.txt', 'w')
+        g = open(os.path.join(output_dir,'raising_words.txt'), 'w')
+        h = open(os.path.join(output_dir,'raising_indices.txt'), 'w')
     else:
-        g = open('equi_words.txt', 'w')
-        h = open('equi_indices.txt', 'w')
+        g = open(os.path.join(output_dir,'equi_words.txt'), 'w')
+        h = open(os.path.join(output_dir,'equi_indices.txt'), 'w')
     # i = 0
-    for root, dirs, files in os.walk(dir):
+    for root, dirs, files in os.walk(input_dir):
         for f in files:
             filename = os.path.join(root, f)
             # print filename    
@@ -48,7 +45,7 @@ def walk(dir, flag):
     g.close()
     h.close()
     
-# what about coord?
+
 def find_raising(filename):
     found = []
     res = []
@@ -73,11 +70,11 @@ def find_raising(filename):
                         main_phrase = phrase_of_var(v)
                         # main_phrase = rest_of_phrase(phrase_of_var(v), ctrl_phrase, xcomp_phrase)
                         res.append((ctrl_phrase, xcomp_phrase, main_phrase))      
-                        print filename
-                        print 's\t', ' '.join(ctrl_phrase[0])
-                        print 'v\t', ' '.join(main_phrase[0])
-                        print 'c\t', ' '.join(xcomp_phrase[0])
-                        print                  
+                        # print filename
+                        # print 's\t', ' '.join(ctrl_phrase[0])
+                        # print 'v\t', ' '.join(main_phrase[0])
+                        # print 'c\t', ' '.join(xcomp_phrase[0])
+                        # print                  
     return res
 
 def find_equi(filename):
@@ -286,30 +283,13 @@ def process_words(words_old, wlist):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2 or sys.argv[1] not in ['-r', '-e']:
+    if len(sys.argv) != 4 or sys.argv[1] not in ['-r', '-e']:
         print 'i have a pancake on my head, your argument is invalid!'
+        print 'arguments: [-r/-e] [LFG directory] [output_directory]'
         exit(0)
-    elif sys.argv[1] == '-e':
-        if debug:
-            read_lfg('../bestTrain/fs_%d.pl'%testid)
-            reslist = find_equi('test')
-        else:
-            walk('../bestTrain', '-e')
     else:
-        if debug:
-            read_lfg('../bestTrain/fs_16537.pl')
-            reslist = find_raising()
-            i = 1
-            for w in words:
-                # print i, w
-                i += 1
-            # for res in reslist:
-            #     # (str_xcomp, str_main, str_ctrl, v, n, xcomp, name, a, c) = res
-            #     # print phrase_of_var(n)[0], phrase_of_var(xcomp)[0]
-            #     for r in res:
-            #         print r
-        else:
-            walk('../bestTrain', '-r')        
+        walk(sys.argv[1], sys.argv[2], sys.argv[3])
+   
 
 
 

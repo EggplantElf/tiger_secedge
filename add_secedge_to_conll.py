@@ -1,64 +1,45 @@
 import sys, re
 from process_tiger import *
 
-def add_secedge(conll_file, xml_file, output_file, sid = None):
+def add_secedge(conll_file, xml_file, output_file, flag):
 
     g = open(output_file, 'w')
-    if sid:
-        m1 = re.compile(r'<s id="s%d".*?</s>' % sid, re.DOTALL).search(open(xml_file).read())
-        m2 = re.compile(r'%d_1.*?\n\n' % sid, re.DOTALL).search(open(conll_file).read())
-        if m1 and m2:
-            print 'a'
-            xml = m1.group()
-            conll_lines = m2.group()
-            conll = {}
-            g.write(process(xml, conll_lines))
 
+    # print 'reading conll file...'
+    conll_dic = {}
+    xml_dic = {}
+    origin_text = open(xml_file).read()
+    pattern = re.compile(r'<s id=.*?</s>', re.DOTALL)
+    sents = pattern.findall(origin_text)
+    pattern = re.compile(r'(?<=<s id="s)\d+(?=">)')
+    for s in sents:
+        m = pattern.search(s)
+        if m:
+            sid = m.group()
+            xml_dic[int(sid)] = s
 
+    lines = ''
+    for line in open(conll_file):
+        if len(line) > 2:
+            lines += line
+        else:
+            sid = int(lines.split('_')[0])
+            conll_dic[sid] = lines
+            lines = ''
 
-
-
-    else:        
-        # read the files
-        print 'reading xml file...'
-        origin_text = open(xml_file).read()
-        # print origin_text
-        pattern = re.compile(r'<s id=.*?</s>', re.DOTALL)
-        res = pattern.findall(origin_text)
-        print len(res)
-        xml_dic = dict(zip(range(1, len(res) + 1), res))
-        print 'done'
-
-
-        # for i in xml_dic.keys()[:5]:
-        #     print i, xml_dic[i]
-
-        print 'reading conll file...'
-        conll_dic = {}
-        lines = ''
-        for line in open(conll_file):
-            if len(line) > 2:
-                lines += line
-            else:
-                conll_dic[len(conll_dic) + 1] = lines
-                lines = ''
-        print 'done'
-
-        for i in conll_dic.keys()[:5]:
-            print i, conll_dic[i]
-
-
-
-
-        for i in conll_dic.keys():
-            g.write(process(xml_dic[i], conll_dic[i]))
-            if i % 1000 == 0:
-                print i
+    for i in conll_dic.keys():
+        if i in xml_dic:
+            g.write(process(xml_dic[i], conll_dic[i], flag))
+        # else:
+            #     g.write(conll_dic[i] + '\n')
+            if i % 2000 == 0:
+                print '.',
 
     g.close()
+    print 'done'
 
 
-def process(xml, conll_lines):
+def process(xml, conll_lines, flag):
 
     conll = {}
     output = {}
@@ -66,7 +47,7 @@ def process(xml, conll_lines):
         if len(line) > 2:
             node = {}
             items = line.strip().split()     
-            output[len(output) + 1] = items
+            output[len(output) + 1] = items[:15] + ['_']
             node['nid'] = int(items[0].split('_')[1])
             node['form'] = items[1]
             node['head'] = int(items[8])
@@ -87,12 +68,23 @@ def process(xml, conll_lines):
         edge_dic[k].sort(key = lambda x: x[1])
 
 
-    for k in output.keys():
-        if k in edge_dic:
-            output[k][12] = '|'.join([str(to) for (label, to) in edge_dic[k]])
-            output[k][14] = '|'.join([label for (label, to) in edge_dic[k]])
-        else:
-            output[k][14] = '_'
+    if flag == '-g':
+        for k in output.keys():
+            if k in edge_dic:
+                output[k][12] = '|'.join([str(to) for (label, to) in edge_dic[k]])
+                output[k][14] = '|'.join([label for (label, to) in edge_dic[k]])
+                output[k][13] = '|'.join([str(to) for (label, to) in edge_dic[k] if label not in ['SBM', 'SBA', 'SBR', 'SBE']])
+                output[k][15] = '|'.join([label for (label, to) in edge_dic[k] if label not in ['SBM', 'SBA', 'SBR', 'SBE']])
+                if not output[k][13]:
+                    output[k][13] = '_'
+                    output[k][15] = '_'
+    else:
+        for k in output.keys():
+            if k in edge_dic:
+                output[k][13] = '|'.join([str(to) for (label, to) in edge_dic[k]])
+                output[k][15] = '|'.join([label for (label, to) in edge_dic[k]])
+
+
     output = '\n'.join(['\t'.join(output[k]) for k in output]) + '\n\n'
     return output
 
@@ -132,7 +124,9 @@ def head_chain(conll, i):
 
 
 if __name__ == '__main__':
-    add_secedge(sys.argv[1], sys.argv[2], sys.argv[3])
-
+    if len(sys.argv) == 5 and sys.argv[1] in ['-g', '-p']:
+        add_secedge(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[1])
+    else:
+        exit(0)
 
 
