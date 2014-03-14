@@ -20,15 +20,19 @@ class Token(object):
         self.pos = entries[4]
         self.head = int(entries[8])
         self.label = entries[10]
-        if entries[12] == '_':
+        if entries[13] == '_':
             self.sec_heads = {}
         else:
-            self.sec_heads = dict(zip(entries[12].split('|'), entries[14].split('|')))
+            self.sec_heads = dict(zip(entries[13].split('|'), entries[15].split('|')))
         self.sec_subj = {}
         self.deps = []
         self.entries = entries
 
     def to_line(self):
+        if self.sec_heads:
+            self.entries[13] = '|'.join([t for (t, l) in sorted(self.sec_heads.items(), key = lambda x: int(x[0]))])
+            self.entries[15] = '|'.join([l for (t, l) in sorted(self.sec_heads.items(), key = lambda x: int(x[0]))])
+        # print '\t'.join(self.entries)
         return '\t'.join(self.entries)
 
 
@@ -51,18 +55,22 @@ class Root(Token):
 
 def update_label(token1, token2, label):
     """
-    Update the output entries of a token, if it is assigned a new label
+    Update the output entries of a token, if it is assigned a new label.
     used in mapping the prediction back to original conll data
     """
     if label:
+        print label
         token1.sec_subj[token2] = label
-        for (k, v) in token2.sec_heads.items():
-            if k == token1.tid:
-                token2.sec_heads[k] = label
+        token2.sec_heads[token1.tid] = label #changed
+        # for (k, v) in token2.sec_heads.items():
+        #     # print k, v, token2.sec_heads
+        #     if k == token1.tid:
+        #         token2.sec_heads[k] = label
         # premise: index also sorted in original file
-        if token2.sec_heads:
-            token2.entries[12] = '|'.join([t for (t, l) in sorted(token2.sec_heads.items(), key = lambda x: int(x[0]))])
-            token2.entries[14] = '|'.join([l for (t, l) in sorted(token2.sec_heads.items(), key = lambda x: int(x[0]))])
+        # if token2.sec_heads:
+        #     token2.entries[13] = '|'.join([t for (t, l) in sorted(token2.sec_heads.items(), key = lambda x: int(x[0]))])
+        #     token2.entries[15] = '|'.join([l for (t, l) in sorted(token2.sec_heads.items(), key = lambda x: int(x[0]))])
+        #     print '\t'.join(token2.entries)
 
 
 

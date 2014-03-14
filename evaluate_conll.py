@@ -1,12 +1,16 @@
 import sys
 
-def evaluate(gold_file, pred_file):
+
+# need change
+
+
+def evaluate(pred_file):
     gold_dic = {'SBM': [], 'SBA': [], 'SBR': [], 'SBE': []}
     pred_dic = {'SBM': [], 'SBA': [], 'SBR': [], 'SBE': []}
     gold_inv_dic = {}
     pred_inv_dic = {}
 
-    for line in open(gold_file):
+    for line in open(pred_file):
         if line.strip():
             items = line.strip().split('\t')
             if items[12] != '_':
@@ -22,10 +26,10 @@ def evaluate(gold_file, pred_file):
     for line in open(pred_file):
         if line.strip():
             items = line.strip().split('\t')
-            if items[12] != '_':
+            if items[13] != '_':
                 sid = int(items[0].split('_')[0])
                 nid = int(items[0].split('_')[1])
-                pairs = zip(items[12].split('|'), items[14].split('|'))
+                pairs = zip(items[13].split('|'), items[15].split('|'))
                 for (vid, label) in pairs:
                     if label in pred_dic:
                         pred_dic[label].append((sid, nid, int(vid)))
@@ -74,4 +78,4 @@ def evaluate(gold_file, pred_file):
 
 
 if __name__ == '__main__':
-    evaluate(sys.argv[1], sys.argv[2])
+    evaluate(sys.argv[1])

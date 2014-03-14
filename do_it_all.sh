@@ -8,9 +8,13 @@ END=$4
 DATA_DIR=experiment/data/ex0
 EXP_DIR=experiment/data/ex$EXP_NUM
 
-echo "Finding raising and equi from LFG files..."
-python find_control_from_LFG.py -r ../bestTrain/ $DATA_DIR
-python find_control_from_LFG.py -e ../bestTrain/ $DATA_DIR
+if [ ! -d $EXP_DIR ]; then
+  mkdir $EXP_DIR
+fi
+
+# echo "Finding raising and equi from LFG files..."
+# python find_control_from_LFG.py -r ../bestTrain/ $DATA_DIR
+# python find_control_from_LFG.py -e ../bestTrain/ $DATA_DIR
 
 # echo "Adding secondary edges into TIGER...(it will take quite a while, why not go and have a coffee)"
 # python process_tiger.py $DATA_DIR/tiger.orig.xml $DATA_DIR/tiger.auto.xml $DATA_DIR/raising_indices.txt $DATA_DIR/equi_indices.txt 123 > $DATA_DIR/process_tiger.log
@@ -22,24 +26,27 @@ python find_control_from_LFG.py -e ../bestTrain/ $DATA_DIR
 # python salto_to_tiger.py $GOLD_SALTO $DATA_DIR/tiger.orig.xml $DATA_DIR/head.xml $DATA_DIR/tiger.tmp.gold.xml
 # python cut_xml.py $DATA_DIR/tiger.tmp.gold.xml $DATA_DIR/head.xml $DATA_DIR/tiger.gold.xml $START $END
 # python add_secedge_to_conll.py -g $DATA_DIR/tiger.orig.conll09 $DATA_DIR/tiger.gold.xml $DATA_DIR/tiger.gold.conll09
+# rm $DATA_DIR/tiger.tmp.gold.xml 
+# rm  $DATA_DIR/tiger.gold.xml 
+# cp $DATA_DIR/tiger.gold.conll09 $EXP_DIR
 
 # # test set for rule-based added edges ($START ~ $END) 
 # echo "test data"
-# python cut_xml.py $DATA_DIR/tiger.auto.xml $DATA_DIR/head.xml $DATA_DIR/tiger.auto.test.xml $START $END
-# python add_secedge_to_conll.py -p $DATA_DIR/tiger.gold.conll09 $DATA_DIR/tiger.auto.test.xml $DATA_DIR/tiger.auto.test.conll09
-    
-# traing set (first ~ $START + $END ~ last)  good
+# python cut_xml.py $DATA_DIR/tiger.auto.xml $DATA_DIR/head.xml $EXP_DIR/tiger.auto.test.xml $START $END
+# python add_secedge_to_conll.py -p $DATA_DIR/tiger.gold.conll09 $EXP_DIR/tiger.auto.test.xml $EXP_DIR/tiger.auto.test.conll09
+# rm $EXP_DIR/tiger.auto.test.xml
 
-# mkdir experiment/data/ex$EXP_NUM
+# # traing set (first ~ $START + $END ~ last)  good
+
+
 
 # echo "training data"
 # python cut_xml.py -r $DATA_DIR/tiger.auto.xml $DATA_DIR/head.xml $DATA_DIR/tiger.train.xml $START $END
-# python add_secedge_to_conll.py -p $DATA_DIR/tiger.orig.conll09 $DATA_DIR/tiger.train.xml EXP_DIR/tiger.train.conll09
+# python add_secedge_to_conll.py -p $DATA_DIR/tiger.orig.conll09 $DATA_DIR/tiger.train.xml $EXP_DIR/tiger.train.conll09
+# rm  $EXP_DIR/tiger.train.xml 
 
-# sed 's/SB[E|R]/SBC/g' $DATA_DIR/tiger.train.conll09 > $DATA_DIR/tiger.train.MAC.conll09
+# sed 's/SB[ER]/SBC/g' $EXP_DIR/tiger.train.conll09 > $EXP_DIR/tiger.train.MAC.conll09
 
 
-# rm $DATA_DIR/tiger.tmp.gold.xml $DATA_DIR/tiger.train.xml $DATA_DIR/tiger.auto.test.xml
-
-# experiment/find_SBC.sh EXP_DIR
-# experiment/map_SBC.sh EXP_DIR
+./find_SBC.sh $EXP_DIR
+./map_SBC.sh $EXP_DIR
