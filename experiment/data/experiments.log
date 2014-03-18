@@ -8,3 +8,11 @@ train.conll09 contains 1168 SBR, 1046 SBE and 828 SBC (not accurate, should subt
 
 ex2:
 train.conll09 has no SBC labels
+
+
+ex5:
+find and map in a pipeline, not successful
+
+
+ex3:
+direct train and test, without find and map, since there is no SBC, ex2 is too complex
