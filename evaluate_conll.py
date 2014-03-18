@@ -44,11 +44,11 @@ def evaluate(pred_file):
 
     print '\nFalse negative:'
     for label in gold_dic:  
-        print label, [p for p in gold_dic[label] if p not in pred_dic[label]]
+        print label, len([p for p in gold_dic[label] if p not in pred_dic[label]])
 
     print '\nFalse positive:'
     for label in pred_dic:  
-        print label, [p for p in pred_dic[label] if p not in gold_dic[label]]
+        print label, len([p for p in pred_dic[label] if p not in gold_dic[label]])
 
 
 
@@ -72,6 +72,7 @@ def evaluate(pred_file):
         if glabel != plabel:
             details.add((key, glabel, plabel))
 
+    print len(details)
     for (index, glabel, plabel) in sorted(details, key = lambda x: int(x[0][0])):
         print '%s\t%s --> %s' % (index, glabel, plabel)
 

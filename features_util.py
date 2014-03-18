@@ -35,6 +35,9 @@ class Token(object):
         # print '\t'.join(self.entries)
         return '\t'.join(self.entries)
 
+    # for debugging
+    def infos(self):
+        return '\t'.join([self.sid, self.tid, self.form, ','.join([k +'='+ v for (k,v) in self.sec_heads.items()])])
 
 
 class Root(Token):
@@ -59,9 +62,13 @@ def update_label(token1, token2, label):
     used in mapping the prediction back to original conll data
     """
     if label:
-        print label
+        # print label
         token1.sec_subj[token2] = label
-        token2.sec_heads[token1.tid] = label #changed
+        for (k, v) in token2.sec_heads.items():
+            if k == token1.tid:
+                # print token2.sec_heads
+                token2.sec_heads[k] = label
+        # token2.sec_heads[token1.tid] = label #changed
         # for (k, v) in token2.sec_heads.items():
         #     # print k, v, token2.sec_heads
         #     if k == token1.tid:
@@ -83,10 +90,10 @@ def postprocess_tokens(sentence, label_filter = None):
         # find the head of the token and add the token into the deps of it's head
         if token.head != 0:
             token.head = sentence[token.head - 1]
-            token.head.deps.append((token))
+            token.head.deps.append(token)
         else:
             token.head = Root()
-            token.head.deps.append((token))
+            token.head.deps.append(token)
         # find the secendary subject with label of the token
         for (index, label) in token.sec_heads.items():
             if not label_filter or label in label_filter:

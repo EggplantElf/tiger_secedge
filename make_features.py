@@ -37,9 +37,11 @@ if __name__=='__main__':
                     for tid2, token2 in enumerate(sentence):
                         if tid1 != tid2:
                             pred_label = feattab.mapback_label(int(pred.readline()))
+                            print pred_label
                             if pred_label:
                                 update_label(token1, token2, pred_label)
             for tid, token in enumerate(sentence):
+                print token.to_line()
                 print >> outstream, token.to_line()
             print >> outstream, ''
 
@@ -53,7 +55,7 @@ if __name__=='__main__':
                     useful_tokens = get_useful_tokens(token1, sentence)
                     # print useful_tokens
                     # add feature of verb
-                    verb_features = make_verb_feature_vector(useful_tokens,token1, sentence,feattab.register_feature)
+                    verb_features = make_verb_feature_vector(useful_tokens,token1, sentence, feattab.register_feature)
                     for tid2, token2 in enumerate(sentence):
                         if tid1 != tid2:
                             # add label
@@ -62,19 +64,17 @@ if __name__=='__main__':
                             else:
                                 label = feattab.register_label('')
                             # add feature of noun
-                            noun_features = make_noun_feature_vector(useful_tokens, token2, sentence,feattab.register_feature)
+                            noun_features = make_noun_feature_vector(useful_tokens, token2, sentence, feattab.register_feature)
                             write_to_file(label,verb_features + noun_features,outstream)
+                            # print verb_features 
+                            # print noun_features
+                            # print token2.infos()
         feattab.save(args.mapfile)
 
     elif args.test:
-        # result = open('gold.txt', 'w')
 
         feattab.load(args.mapfile)
         for sentence in sentences(codecs.open(args.inputfile,encoding='utf-8'), ['SBM', 'SBA', 'SBR', 'SBE']):
-            # for tid,token in enumerate(sentence):
-            #   features = make_feature_vector(tid,token,sentence,feattab.map_feature)
-            #   write_to_file(0,features,outstream)
-
             for tid1,token1 in enumerate(sentence):
                 if token1.pos[0] == 'V' and token1.head.pos != '-ROOT-':
                     useful_tokens = get_useful_tokens(token1, sentence)
