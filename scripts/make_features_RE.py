@@ -13,7 +13,7 @@ if __name__=='__main__':
     argpar = argparse.ArgumentParser(description='Creates a feature representation for each word in a given file in CoNLL09 format')
     mode = argpar.add_mutually_exclusive_group(required=True)
     mode.add_argument('-train',dest='train',action='store_true',help='run in training mode')
-    mode.add_argument('-test',dest='test',action='store_true',help='run in test mode')
+    mode.add_argument('-pred',dest='pred',action='store_true',help='run in pred mode')
     mode.add_argument('-mapback',dest='mapback',action='store_true',help='map result back into original conll file')
     argpar.add_argument('-i','--input',dest='inputfile',help='input file',required=True)
     argpar.add_argument('-m','--featmap',dest='mapfile',help='feature mapping file',required=True)
@@ -36,6 +36,7 @@ if __name__=='__main__':
                     if label in ['SBC']:
                         count += 1
                         pred_label = feattab.mapback_label(int(pred.readline()))
+                        # print label, pred_label
                         update_label(token1, token2, pred_label)
             for tid, token in enumerate(sentence):
                 print >> outstream, token.to_line()
@@ -60,7 +61,7 @@ if __name__=='__main__':
         feattab.save(args.mapfile)
 
 
-    elif args.test:
+    elif args.pred:
         feattab.load(args.mapfile)
         for sentence in sentences(codecs.open(args.inputfile,encoding='utf-8')):
             for tid1, token1 in enumerate(sentence):

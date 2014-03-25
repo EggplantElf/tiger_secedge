@@ -5,8 +5,8 @@ import sys
 
 
 def evaluate(pred_file):
-    gold_dic = {'SBM': [], 'SBA': [], 'SBR': [], 'SBE': []}
-    pred_dic = {'SBM': [], 'SBA': [], 'SBR': [], 'SBE': []}
+    gold_dic = {'SBM': [], 'SBA': [], 'SBR': [], 'SBE': [], 'SBC': []}
+    pred_dic = {'SBM': [], 'SBA': [], 'SBR': [], 'SBE': [], 'SBC': []}
     gold_inv_dic = {}
     pred_inv_dic = {}
 
@@ -42,6 +42,23 @@ def evaluate(pred_file):
 
     print 'total:\t', sum([len(gold_dic[l])for l in gold_dic])
 
+
+    tp = sum([len([p for p in gold_dic[label] if p in pred_dic[label]]) for label in gold_dic])
+    fn = sum([len([p for p in gold_dic[label] if p not in pred_dic[label]]) for label in gold_dic])
+    fp = sum([len([p for p in pred_dic[label] if p not in gold_dic[label]]) for label in gold_dic])
+    precision = 1.0 * tp / (tp + fp)
+    recall = 1.0 * tp / (tp + fn)
+    f_score = 2.0 * tp / (2.0 * tp + fn + fp)
+
+    print 'precision:\t%.4f' % precision
+    print 'recall:\t%.4f' % recall
+    print 'f-score:\t%.4f' % f_score
+
+
+    print '\nTrue positive:'
+    for label in gold_dic:
+        print label, len([p for p in gold_dic[label] if p in pred_dic[label]])
+
     print '\nFalse negative:'
     for label in gold_dic:  
         print label, len([p for p in gold_dic[label] if p not in pred_dic[label]])
@@ -73,8 +90,8 @@ def evaluate(pred_file):
             details.add((key, glabel, plabel))
 
     print len(details)
-    for (index, glabel, plabel) in sorted(details, key = lambda x: int(x[0][0])):
-        print '%s\t%s --> %s' % (index, glabel, plabel)
+    # for (index, glabel, plabel) in sorted(details, key = lambda x: int(x[0][0])):
+        # print '%s\t%s --> %s' % (index, glabel, plabel)
 
 
 

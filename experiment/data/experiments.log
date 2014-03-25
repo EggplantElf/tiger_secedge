@@ -19,3 +19,9 @@ direct train and test, without find and map, since there is no SBC, ex2 is too c
 
 ex9:
 devide into 3 step pipeleine, find MA, find C, map RE, test accuracy between pred and auto on each step
+
+ex10:
+e step pipeline, test on final result
+
+ex11:
+use the SBC data from ex1 again

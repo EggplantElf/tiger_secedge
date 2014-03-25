@@ -12,7 +12,7 @@ if __name__=='__main__':
     argpar = argparse.ArgumentParser(description='Creates a feature representation for each word in a given file in CoNLL09 format')
     mode = argpar.add_mutually_exclusive_group(required=True)
     mode.add_argument('-train',dest='train',action='store_true',help='run in training mode')
-    mode.add_argument('-test',dest='test',action='store_true',help='run in test mode')
+    mode.add_argument('-pred',dest='pred',action='store_true',help='run in pred mode')
     mode.add_argument('-mapback',dest='mapback',action='store_true',help='map result back into original conll file')
     argpar.add_argument('-i','--input',dest='inputfile',help='input file',required=True)
     argpar.add_argument('-m','--featmap',dest='mapfile',help='feature mapping file',required=True)
@@ -28,7 +28,7 @@ if __name__=='__main__':
         feattab.load(args.mapfile)
         feattab.invert_tabs()
 
-        for sentence in sentences(codecs.open(args.inputfile,encoding='utf-8'), ['SBM', 'SBA', 'SBC']):
+        for sentence in sentences(codecs.open(args.inputfile,encoding='utf-8'), ['SBM', 'SBA']):
             for tid1,token1 in enumerate(sentence):
                 if token1.pos[0] == 'V' and token1.head.pos != '-ROOT-':
                     useful_tokens = get_useful_tokens(token1, sentence)
@@ -47,7 +47,7 @@ if __name__=='__main__':
 
 
     elif args.train:
-        for sentence in sentences(codecs.open(args.inputfile,encoding='utf-8'), ['SBM', 'SBA', 'SBC']):
+        for sentence in sentences(codecs.open(args.inputfile,encoding='utf-8'), ['SBM', 'SBA']):
             for tid1,token1 in enumerate(sentence):
                 if token1.pos[0] == 'V' and token1.head.pos != '-ROOT-':
                     useful_tokens = get_useful_tokens(token1, sentence)
@@ -72,11 +72,11 @@ if __name__=='__main__':
 
 
 
-    elif args.test:
+    elif args.pred:
         # result = open('gold.txt', 'w')
 
         feattab.load(args.mapfile)
-        for sentence in sentences(codecs.open(args.inputfile,encoding='utf-8'), ['SBM', 'SBA', 'SBC']):
+        for sentence in sentences(codecs.open(args.inputfile,encoding='utf-8'), ['SBM', 'SBA']):
             # for tid,token in enumerate(sentence):
             #   features = make_feature_vector(tid,token,sentence,feattab.map_feature)
             #   write_to_file(0,features,outstream)

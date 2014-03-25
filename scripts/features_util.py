@@ -62,12 +62,12 @@ def update_label(token1, token2, label):
     used in mapping the prediction back to original conll data
     """
     if label:
-        # print label
         token1.sec_subj[token2] = label
-        for (k, v) in token2.sec_heads.items():
-            if k == token1.tid:
-                # print token2.sec_heads
-                token2.sec_heads[k] = label
+        token2.sec_heads[token1.tid] = label
+        # for (k, v) in token2.sec_heads.items():
+        #     if k == token1.tid:
+        #         token2.sec_heads[k] = label
+        #         print token2.sec_heads
         # token2.sec_heads[token1.tid] = label #changed
         # for (k, v) in token2.sec_heads.items():
         #     # print k, v, token2.sec_heads
