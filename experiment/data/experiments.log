@@ -16,3 +16,6 @@ find and map in a pipeline, not successful
 
 ex3:
 direct train and test, without find and map, since there is no SBC, ex2 is too complex
+
+ex9:
+devide into 3 step pipeleine, find MA, find C, map RE, test accuracy between pred and auto on each step
