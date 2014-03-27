@@ -4,6 +4,26 @@
 		"selected_items":
 		[
 			[
+				"tmp",
+				"tmp1"
+			],
+			[
+				"gol",
+				"gold_dic"
+			],
+			[
+				"fsc",
+				"f_score"
+			],
+			[
+				"pre",
+				"precision"
+			],
+			[
+				"tok",
+				"token1"
+			],
+			[
 				"has",
 				"has_many"
 			],
@@ -14,10 +34,6 @@
 			[
 				"h",
 				"head"
-			],
-			[
-				"tok",
-				"token"
 			],
 			[
 				"tra",
@@ -116,16 +132,8 @@
 				"gold_dic"
 			],
 			[
-				"gol",
-				"gold_inv_dic"
-			],
-			[
 				"g",
 				"glabel"
-			],
-			[
-				"pre",
-				"pred_inv_dic"
 			],
 			[
 				"gl",
@@ -506,24 +514,64 @@
 			[
 				"ta",
 				"target"
-			],
-			[
-				"Dep",
-				"DepTree"
-			],
-			[
-				"De",
-				"DepNode"
 			]
 		]
 	},
 	"buffers":
 	[
 		{
-			"file": "/Users/eggplant/Library/Application Support/Sublime Text 3/Local/Session.sublime_session",
+			"file": "scripts/make_features_MA.py",
 			"settings":
 			{
-				"buffer_size": 81571,
+				"buffer_size": 10818,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "step2_find_C.sh",
+			"settings":
+			{
+				"buffer_size": 769,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "test_each_step.sh",
+			"settings":
+			{
+				"buffer_size": 910,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "scripts/make_features_RE.py",
+			"settings":
+			{
+				"buffer_size": 3592,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "scripts/make_features_C.py",
+			"settings":
+			{
+				"buffer_size": 5130,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "step3_find_RE.sh",
+			"settings":
+			{
+				"buffer_size": 701,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "scripts/evaluate_conll.py",
+			"settings":
+			{
+				"buffer_size": 3775,
 				"line_ending": "Unix"
 			}
 		}
@@ -558,18 +606,69 @@
 	},
 	"file_history":
 	[
-		"/Users/eggplant/Library/Application Support/Sublime Text 3/Packages/User/Preferences.sublime-settings",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex12/tiger.gold.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex12/tiger.gold.C.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex12/tiger.gold.RE.C.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex12/tiger.pred.MA.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/step1_find_MA.sh",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex12/tiger.pred.C.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/pipe.sh",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex11/tiger.train.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/scripts/evaluate_conll.py",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/experiments.log",
+		"/Users/eggplant/Documents/work/tiger_secedge/step2_find_C.sh",
 		"/Users/eggplant/Documents/work/tiger_secedge/find_secedges.sh",
+		"/Users/eggplant/Documents/work/tiger_secedge/scripts/features_util.py",
+		"/Users/eggplant/Documents/work/tiger_secedge/scripts/test.py",
+		"/Users/eggplant/Documents/work/tiger_secedge/scripts/test_util.py",
+		"/Users/eggplant/Documents/work/tiger_secedge/scripts/make_features_C.py",
+		"/Users/eggplant/Documents/work/tiger_secedge/scripts/sellect_features.py",
+		"/Users/eggplant/Documents/work/tiger_secedge/scripts/feat.func",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex11/train.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex10/tiger.train.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/scripts/make_features_RE.py",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex1/train.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex10/tiger.pred.MARE.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex9/tiger.pred.RE.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex9/tiger.gold.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/step3_find_RE.sh",
+		"/Users/eggplant/Documents/work/tiger_secedge/test.txt",
+		"/Users/eggplant/Documents/work/tiger_secedge/train_and_test.sh",
+		"/Users/eggplant/Documents/work/tiger_secedge/prepare_train_and_test_data.sh",
+		"/Users/eggplant/Documents/work/tiger_secedge/do_it_all.sh",
+		"/Users/eggplant/Documents/work/tiger_secedge/tiger.gold.RE.pred.C.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex9/tiger.gold-pred.C.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex9/tiger.pred.C.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex9/find_C_pred.features",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex8/tiger.gold.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex3/tiger.gold.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex0/tiger.gold.xml",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex0/tiger.gold.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/useful_data/tiger.gold.xml",
+		"/Users/eggplant/Documents/work/tiger_secedge/useful_data/tiger.gold.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex7/gold.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex6/gold.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex9/tiger.gold.C.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex9/tiger.train.C.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/step3_map_RE.sh",
+		"/Users/eggplant/Documents/work/tiger_secedge/scripts/salto_to_tiger.py",
+		"/Users/eggplant/Documents/work/tiger_secedge/scripts/make_features_MA.py",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex9/tiger.auto.C.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex9/tiger.train.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex9/tiger.pred.MA.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex9/tiger.auto.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/bs4/element.py",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex2/auto.test.MAC.conll09",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex9/pred_MA.txt",
+		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex8/result.txt",
+		"/Users/eggplant/Documents/work/tiger_secedge/find_MA.sh",
+		"/Users/eggplant/Library/Application Support/Sublime Text 3/Local/Session.sublime_session",
+		"/Users/eggplant/Library/Application Support/Sublime Text 3/Packages/User/Preferences.sublime-settings",
 		"/Users/eggplant/Documents/work/tiger_secedge/find_SBC.sh",
 		"/Users/eggplant/Documents/work/tiger_secedge/map_SBC.sh",
-		"/Users/eggplant/Documents/work/tiger_secedge/scripts/make_features_MA.py",
-		"/Users/eggplant/Documents/work/tiger_secedge/scripts/make_features_RE.py",
-		"/Users/eggplant/Documents/work/tiger_secedge/scripts/make_features_C.py",
 		"/Users/eggplant/tiger.sublime-project",
 		"/Users/eggplant/Documents/work/tiger_secedge/scripts/make_features_find_SBC copy 2.py",
 		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex8/tiger.pred.conll09",
-		"/Users/eggplant/Documents/work/tiger_secedge/scripts/evaluate_conll.py",
-		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/experiments.log",
 		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex5/tiger.auto.test.conll09",
 		"/Users/eggplant/Documents/work/tiger_secedge/scripts/make_features.py",
 		"/Users/eggplant/Documents/work/tiger_secedge/scripts/make_features_find_SBC copy.py",
@@ -577,11 +676,8 @@
 		"/Users/eggplant/Documents/work/tiger_secedge/pred.conll09",
 		"/Users/eggplant/Documents/work/tiger_secedge/tmp1-15",
 		"/Users/eggplant/Documents/work/tiger_secedge/scripts/make_features_map_SBC.py",
-		"/Users/eggplant/Documents/work/tiger_secedge/scripts/features_util.py",
 		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex8/tiger.gold=pred.MAC.conll09",
-		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex8/tiger.gold.conll09",
 		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex8/map_pred.txt",
-		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex8/result.txt",
 		"/Users/eggplant/Documents/work/tiger_secedge/scripts/process_tiger.py",
 		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex8/tiger.train.conll09",
 		"/Users/eggplant/Documents/work/tiger_secedge/tiger.gold=pred.MAC.conll09",
@@ -592,8 +688,6 @@
 		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex5/tiger.pred.MAC copy.conll09",
 		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex5/tiger.pred.conll09",
 		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex7/pred.conll09",
-		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex3/tiger.gold.conll09",
-		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex7/gold.conll09",
 		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex7/test.conll09",
 		"/Users/eggplant/Documents/work/tiger_secedge/experiment/data/ex7/result.txt",
 		"/Users/eggplant/Documents/workspace/Tagger/src/projectcl/ExtractFeatures.java",
@@ -639,53 +733,7 @@
 		"/Users/eggplant/rail_projects/sample_app/app/views/shared/_stats.html.erb",
 		"/Users/eggplant/rail_projects/sample_app/lib/tasks/sample_data.rake",
 		"/Users/eggplant/rail_projects/sample_app/app/views/shared/_feed.html.erb",
-		"/Users/eggplant/rail_projects/sample_app/app/views/static_pages/home.html.erb",
-		"/Users/eggplant/rail_projects/sample_app/app/views/layouts/_shim.html.erb",
-		"/Users/eggplant/rail_projects/sample_app/app/views/layouts/_header.html.erb",
-		"/Users/eggplant/rail_projects/sample_app/app/views/shared/_micropost_form.html.erb",
-		"/Users/eggplant/rail_projects/sample_app/config/initializers/wrap_parameters.rb",
-		"/Users/eggplant/rail_projects/sample_app/config/environments/production.rb",
-		"/Users/eggplant/rail_projects/sample_app/README.md",
-		"/Users/eggplant/rail_projects/sample_app/db/schema.rb",
-		"/Users/eggplant/rail_projects/sample_app/spec/factories.rb",
-		"/Users/eggplant/rail_projects/sample_app/app/views/users/edit.html.erb",
-		"/Users/eggplant/rail_projects/sample_app/app/views/shared/_error_messages.html.erb",
-		"/Users/eggplant/rail_projects/sample_app/app/views/users/new.html.erb",
-		"/Users/eggplant/rail_projects/sample_app/config/initializers/secret_token.rb",
-		"/Users/eggplant/rail_projects/sample_app/app/views/shared/_user_info.html.erb",
-		"/Users/eggplant/rail_projects/sample_app/app/views/static_pages/help.html.erb",
-		"/Users/eggplant/rail_projects/sample_app/app/views/users/index.html.erb",
-		"/Users/eggplant/rail_projects/sample_app/spec/models/micropost_spec.rb",
-		"/Users/eggplant/rail_projects/sample_app/Gemfile",
-		"/Users/eggplant/rail_projects/sample_app/config/database.yml",
-		"/Users/eggplant/rail_projects/sample_app/config/initializers/inflections.rb",
-		"/Users/eggplant/rail_projects/sample_app/db/migrate/20140317140324_create_users.rb",
-		"/Users/eggplant/rail_projects/sample_app/spec/spec_helper.rb",
-		"/Users/eggplant/rail_projects/sample_app/app/assets/stylesheets/static_pages.css.scss",
-		"/Users/eggplant/rail_projects/sample_app/spec/helpers/application_helper_spec.rb",
-		"/Users/eggplant/rail_projects/sample_app/app/helpers/application_helper.rb",
-		"/Users/eggplant/rail_projects/sample_app/app/helpers/static_pages_helper.rb",
-		"/Users/eggplant/rail_projects/sample_app/spec/support/utilities.rb",
-		"/Users/eggplant/rail_projects/sample_app/app/assets/javascripts/application.js",
-		"/Users/eggplant/rail_projects/sample_app/app/views/static_pages/about.html.erb",
-		"/Users/eggplant/rail_projects/sample_app/app/views/layouts/application.html.erb",
-		"/Users/eggplant/rail_projects/sample_app/app/views/static_pages/contact.html.erb",
-		"/Users/eggplant/rail_projects/sample_app/tmp/cache/assets/test/sass/ee54b5d93443a0f5f9111478e492b282cd5c136a/static_pages.css.scssc",
-		"/Users/eggplant/rail_projects/sample_app/tmp/cache/assets/development/sass/ee54b5d93443a0f5f9111478e492b282cd5c136a/static_pages.css.scssc",
-		"/Users/eggplant/rail_projects/sample_app/app/assets/javascripts/static_pages.js.coffee",
-		"/etc/paths",
-		"/Users/eggplant/rail_projects/sample_app/config/initializers/session_store.rb",
-		"/Users/eggplant/rail_projects/sample_app/config/initializers/backtrace_silencers.rb",
-		"/Users/eggplant/rail_projects/sample_app/Rakefile",
-		"/Users/eggplant/rail_projects/sample_app/config/application.rb",
-		"/Users/eggplant/rail_projects/sample_app/db/seeds.rb",
-		"/Users/eggplant/rail_projects/sample_app/app/views/sessions/new.html.erb",
-		"/Users/eggplant/Downloads/evilcos_rss_2014.opml",
-		"/Users/eggplant/Documents/work/tiger_secedge/prepare_train_and_test_data.sh",
-		"/Users/eggplant/Documents/work/tiger_secedge/add_secedges.sh",
-		"/Users/eggplant/Documents/work/tiger_secedge/prepare_data.sh",
-		"/Users/eggplant/Documents/work/tiger_secedge/do_it_all.sh",
-		"/Users/eggplant/Documents/work/tiger_secedge/train_and_test.sh"
+		"/Users/eggplant/rail_projects/sample_app/app/views/static_pages/home.html.erb"
 	],
 	"find":
 	{
@@ -704,6 +752,33 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"SBC",
+			"SBR",
+			"SBC",
+			"SBR",
+			"SBC",
+			"make_noun",
+			"SBA",
+			"SBR",
+			"gold",
+			"SBA|",
+			"SBC|",
+			"SBR",
+			"SBC",
+			"SBE",
+			"map_RE",
+			"SBC",
+			"test",
+			"SBC",
+			"SBE",
+			"SBR",
+			"SBE",
+			"SBR",
+			"MA",
+			"1",
+			"test",
+			"SBA",
+			"find_SBC",
 			"eggplant/tiger",
 			"project",
 			"test",
@@ -804,34 +879,7 @@
 			"SBC",
 			"tmp",
 			"SBR",
-			"SBE",
-			"print",
-			"SBC",
-			"pairs",
-			"_items",
-			"gold.",
-			"gold",
-			"print",
-			"杨金义",
-			"SBA",
-			"gold",
-			"SBE",
-			"SBR",
-			"SBC",
-			"to_line",
-			"map",
-			"SB",
-			"SBA",
-			"SBC",
-			"MAC",
-			"sentences",
-			"SBC",
-			"gold",
-			"SBC",
-			"450000",
-			"find",
-			"test.features",
-			"train.features"
+			"SBE"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -839,6 +887,12 @@
 		"regex": false,
 		"replace_history":
 		[
+			"find_RE",
+			"RE",
+			"pred",
+			"SBC",
+			"C",
+			"find_MA",
 			"pred",
 			"SBC",
 			"EXP_DIR",
@@ -935,16 +989,103 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 2,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "/Users/eggplant/Library/Application Support/Sublime Text 3/Local/Session.sublime_session",
+					"file": "scripts/make_features_MA.py",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 81571,
+						"buffer_size": 10818,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4367,
+								4367
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1071.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "step2_find_C.sh",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 769,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								404,
+								404
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/ShellScript/Shell-Unix-Generic.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "test_each_step.sh",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 910,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								837,
+								461
+							]
+						],
+						"settings":
+						{
+							"auto_name": "",
+							"syntax": "Packages/ShellScript/Shell-Unix-Generic.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "scripts/make_features_RE.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3592,
 						"regions":
 						{
 						},
@@ -957,14 +1098,103 @@
 						],
 						"settings":
 						{
-							"syntax": "Packages/Text/Plain text.tmLanguage",
-							"translate_tabs_to_spaces": false
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 27016.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "scripts/make_features_C.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5130,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1107,
+								1107
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "step3_find_RE.sh",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 701,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								11,
+								11
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/ShellScript/Shell-Unix-Generic.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "scripts/evaluate_conll.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3775,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2018,
+								1897
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 431.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
 					"type": "text"
 				}
 			]
@@ -976,7 +1206,7 @@
 	},
 	"input":
 	{
-		"height": 0.0
+		"height": 31.0
 	},
 	"layout":
 	{
@@ -1020,6 +1250,34 @@
 		"height": 0.0,
 		"selected_items":
 		[
+			[
+				"eva",
+				"scripts/evaluate_conll.py"
+			],
+			[
+				"pi",
+				"pipe.sh"
+			],
+			[
+				"st2",
+				"step2_find_C.sh"
+			],
+			[
+				"ste",
+				"step1_find_MA.sh"
+			],
+			[
+				"gold",
+				"experiment/data/ex9/tiger.gold.conll09"
+			],
+			[
+				"ste2",
+				"step2_find_C.sh"
+			],
+			[
+				"evalcon",
+				"scripts/evaluate_conll.py"
+			],
 			[
 				"user.rb",
 				"app/models/user.rb"

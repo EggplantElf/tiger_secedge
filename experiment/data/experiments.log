@@ -25,3 +25,6 @@ e step pipeline, test on final result
 
 ex11:
 use the SBC data from ex1 again
+
+ex12:
+use different featureset, test each step
