@@ -2,6 +2,8 @@
 *.pyc
 *.conll09
 *.features
+tmp
+tmp*
 useful_data/
 experiment/data/**/
 !experiment/experiments.log
