@@ -101,7 +101,8 @@ def evaluate(pred_file):
 
     # print len(details)
     # for (index, glabel, plabel) in sorted(details, key = lambda x: int(x[0][0])):
-        # print '%s\t%s --> %s' % (index, glabel, plabel)
+    #     if glabel in ['SBE', 'SBR', 'SBC'] or plabel in ['SBE', 'SBR', 'SBC']:
+    #         print '%s\t%s --> %s' % (index, glabel, plabel)
 
 
 

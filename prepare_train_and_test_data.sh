@@ -10,7 +10,7 @@ DATA_DIR=experiment/data/ex0
 EXP_DIR=experiment/data/ex$EXP_NUM
 
 
-echo "Preparing training and test set...(it will take quite a while, why not have another coffee)"
+echo "Preparing training and test set...(it will take quite a while, why not go and have a coffee)"
 # annotated gold data ($START ~ $END)
 echo "gold data"
 python $PY_DIR/salto_to_tiger.py $GOLD_SALTO $DATA_DIR/tiger.orig.xml $DATA_DIR/head.xml $DATA_DIR/tiger.tmp.gold.xml
@@ -30,7 +30,7 @@ rm $EXP_DIR/tiger.auto.test.xml
 echo "training data"
 python $PY_DIR/cut_xml.py -r $DATA_DIR/tiger.auto.xml $DATA_DIR/head.xml $DATA_DIR/tiger.train.xml $START $END
 python $PY_DIR/add_secedge_to_conll.py -p $DATA_DIR/tiger.orig.conll09 $DATA_DIR/tiger.train.xml $EXP_DIR/tiger.train.conll09
-rm  $EXP_DIR/tiger.train.xml 
+rm  $DATA_DIR/tiger.train.xml 
 
 # (optional) mapping labels
 sed 's/SB[ER]/SBC/g' $EXP_DIR/tiger.train.conll09 > $EXP_DIR/tiger.train.MAC.conll09

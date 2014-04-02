@@ -1,5 +1,8 @@
+#!/bin/bash
 
+set -ue
 
+EXP_DIR=$1
 
 
 echo "making features for train..."

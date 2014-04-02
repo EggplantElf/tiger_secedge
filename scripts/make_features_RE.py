@@ -9,7 +9,6 @@ from features_util import *
 if __name__=='__main__':
     import argparse
 
-    count = 0
     argpar = argparse.ArgumentParser(description='Creates a feature representation for each word in a given file in CoNLL09 format')
     mode = argpar.add_mutually_exclusive_group(required=True)
     mode.add_argument('-train',dest='train',action='store_true',help='run in training mode')
@@ -34,7 +33,6 @@ if __name__=='__main__':
                 for token2 in token1.sec_subj:
                     label = token1.sec_subj[token2]
                     if label in ['SBC']:
-                        count += 1
                         pred_label = feattab.mapback_label(int(pred.readline()))
                         # print label, pred_label
                         update_label(token1, token2, pred_label)
@@ -68,10 +66,9 @@ if __name__=='__main__':
                 for token2 in token1.sec_subj:
                     label = token1.sec_subj[token2]
                     if label in ['SBC']:
-                        count += 1
                         useful_tokens = get_useful_tokens(token1, sentence)
-                        verb_features = make_verb_feature_vector(useful_tokens,token1, sentence,feattab.register_feature)
-                        noun_features = make_noun_feature_vector(useful_tokens, token2, sentence,feattab.register_feature)
+                        verb_features = make_verb_feature_vector(useful_tokens,token1, sentence,feattab.map_feature)
+                        noun_features = make_noun_feature_vector(useful_tokens, token2, sentence,feattab.map_feature)
                         write_to_file(0, verb_features + noun_features,outstream)        
 
     outstream.close()

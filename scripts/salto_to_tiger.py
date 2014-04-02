@@ -8,12 +8,16 @@ def convert(salto_input, tiger_input, head_file,tiger_output):
     for frame in frames:
         frame = bs4.BeautifulSoup(frame, 'xml').frame
         label = frame['name']
+        # print frame
         sb = frame.find(lambda x: x.name == 'fe' and x['name'] == 'SB').fenode['idref']
-        oc = frame.find(lambda x: x.name == 'fe' and x['name'] == 'OC').fenode['idref']
+        # print sb
+        oc = frame.find(lambda x: x.name == 'fe' and x['name'] == 'OC')
         sid = sb.split('_')[0]
         if sid not in edge_from_frames:
             edge_from_frames[sid] = []
-        edge_from_frames[sid].append((sb, oc, label))
+        for child in oc.children:
+            if type(child) == bs4.element.Tag:
+                edge_from_frames[sid].append((sb, child['idref'], label))
 
 
     # print edge_from_frames

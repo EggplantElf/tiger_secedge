@@ -11,4 +11,4 @@ echo "step2"
 echo "step3"
 ./step3_find_RE.sh  $EXP_DIR    tiger.pred.MAC.conll09  tiger.pred.MARE.conll09
 
-python scripts/evaluate_conll.py $EXP_DIR/tiger.pred.MARE.conll09
+python scripts/evaluate_conll.py $EXP_DIR/tiger.pred.MARE.conll09 >> $EXP_DIR/result.log

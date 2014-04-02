@@ -46,6 +46,7 @@ class Root(Token):
     """
 
     def __init__(self):
+        self.tid = 0
         self.form = '-ROOT-'
         self.lemma = '-ROOT-'
         self.pos = '-ROOT-'
@@ -64,20 +65,7 @@ def update_label(token1, token2, label):
     if label:
         token1.sec_subj[token2] = label
         token2.sec_heads[token1.tid] = label
-        # for (k, v) in token2.sec_heads.items():
-        #     if k == token1.tid:
-        #         token2.sec_heads[k] = label
-        #         print token2.sec_heads
-        # token2.sec_heads[token1.tid] = label #changed
-        # for (k, v) in token2.sec_heads.items():
-        #     # print k, v, token2.sec_heads
-        #     if k == token1.tid:
-        #         token2.sec_heads[k] = label
-        # premise: index also sorted in original file
-        # if token2.sec_heads:
-        #     token2.entries[13] = '|'.join([t for (t, l) in sorted(token2.sec_heads.items(), key = lambda x: int(x[0]))])
-        #     token2.entries[15] = '|'.join([l for (t, l) in sorted(token2.sec_heads.items(), key = lambda x: int(x[0]))])
-        #     print '\t'.join(token2.entries)
+
 
 
 
@@ -167,11 +155,14 @@ class FeatureTable(object):
 
     def invert_tabs(self):
         self.inv_labeltab = {v:k for k, v in self.labeltab.items()}
-        # self.inv_feattab = {v:k for k, v in self.feattab.items()}
+        self.inv_feattab = {v:k for k, v in self.feattab.items()}
 
 
     def mapback_label( self, i):
         return self.inv_labeltab.get(i, None)
+
+    def mapback_feature( self, i):
+        return self.inv_feattab.get(i, None)
 
 
 
@@ -180,14 +171,40 @@ def write_to_file( label, features, fileobj ):
     features.discard(None)
     print >> fileobj, '%d %s' % (label,' '.join(map(lambda x: '%d:1' % x,sorted(features))))
 
+
+
+
+
+# travese all possible verb subject pairs
+def traverse(sentence):
+    for tid1,token1 in enumerate(sentence):
+        if token1.pos[0] == 'V' and token1.head.pos != '-ROOT-':
+
+
+
+
+
+            useful_tokens = get_useful_tokens(token1, sentence)
+            # add feature of verb
+            verb_features = make_verb_feature_vector(useful_tokens,token1, sentence,feattab.register_feature)
+            for tid2, token2 in enumerate(sentence):
+                if tid1 != tid2:
+                    pred_label = feattab.mapback_label(int(pred.readline()))
+                    if pred_label:
+                        update_label(token1, token2, pred_label)
+
+
+
+
+
 # save some usful tokens in a dictionary to use later
 def get_useful_tokens(verb, sentence):
     dic = {}
     # head, head's head, and head's head's head
+    dic['VERB'] = verb
     dic['HEAD1'] = skip_conj_head(sentence, verb, 1)
     dic['HEAD2'] = skip_conj_head(sentence, verb, 2)
     dic['HEAD3'] = skip_conj_head(sentence, verb, 3)
-
     # subject, direct object, dative object, and prepositional object on each head
     dic['HEAD1.SB'] = get_token_by_path(sentence, dic['HEAD1'], ['SB'])
     dic['HEAD1.OA'] = get_token_by_path(sentence, dic['HEAD1'], ['OA'])
@@ -206,6 +223,7 @@ def get_useful_tokens(verb, sentence):
 
 # Make features for candidates of a verb in a sencondary dependency
 def make_verb_feature_vector(useful_tokens, verb, sentence, mapfunc):   
+    # print verb.form
     features = []
     root_path = chain_to_root(sentence, verb)
     root_path_pos = map(lambda x: x.pos, root_path)
@@ -227,14 +245,28 @@ def make_verb_feature_vector(useful_tokens, verb, sentence, mapfunc):
     # features.append(mapfunc('PATH.F3.LABEL:%s' % '_'.join((root_path_label + ['--', '--'])[:3])))
 
     # whether the verb is infinitive with zu
-    features.append(mapfunc('ZU_INF:%s' % (verb.pos == 'VVIZU' or get_token_by_path(sentence, verb, ['PM']) != None)))
+    # features.append(mapfunc('ZU_INF:%s' % (verb.pos == 'VVIZU' or get_token_by_path(sentence, verb, ['PM']) != None)))
+    if verb.pos == 'VVIZU' or get_token_by_path(sentence, verb, ['PM']) != None:
+        features.append(mapfunc('ZU_INF'))
+
+
     # POS of the verb's OC dependant if there is one
     features.append(mapfunc('SELF.OC.POS:%s' % get_pos(get_token_by_path(sentence, verb, ['OC']))))
+    # whether the verb has "wie", "weil", "um" etc
+
+    # features.append(mapfunc('SELF.KOUI:%s' % (get_deps_by_pos(sentence, verb, 'KOUI')!= [])))
+    # features.append(mapfunc('SELF.KOUS:%s' % (get_deps_by_pos(sentence, verb, 'KOUS')!= [])))
+    # features.append(mapfunc('SELF.PWAV:%s' % (get_deps_by_pos(sentence, verb, 'PWAV')!= [])))
+    # features.append(mapfunc('SELF.PAV:%s' % (get_deps_by_pos(sentence, verb, 'PAV')!= [])))
+
+    for pos in ['KOUI', 'KOUS', 'PWAV', 'PAV']:
+        if get_deps_by_pos(sentence, verb, 'PWAV'):
+            features.append(mapfunc('SELF.%s' % pos))
 
     # lemmas of the heads
-    features.append(mapfunc('HEAD1.LEMMA:%s' % get_lemma(useful_tokens['HEAD1'])))
-    features.append(mapfunc('HEAD2.LEMMA:%s' % get_lemma(useful_tokens['HEAD2'])))
-    features.append(mapfunc('HEAD3.LEMMA:%s' % get_lemma(useful_tokens['HEAD3'])))
+    # features.append(mapfunc('HEAD1.LEMMA:%s' % get_lemma(useful_tokens['HEAD1'])))
+    # features.append(mapfunc('HEAD2.LEMMA:%s' % get_lemma(useful_tokens['HEAD2'])))
+    # features.append(mapfunc('HEAD3.LEMMA:%s' % get_lemma(useful_tokens['HEAD3'])))
 
 
     # POS of the heads and their dependants
@@ -243,6 +275,7 @@ def make_verb_feature_vector(useful_tokens, verb, sentence, mapfunc):
     features.append(mapfunc('HEAD1.OA:%s' % get_pos(useful_tokens['HEAD1.OA'])))
     features.append(mapfunc('HEAD1.DA:%s' % get_pos(useful_tokens['HEAD1.DA'])))
     features.append(mapfunc('HEAD1.OP.NK:%s' % get_pos(useful_tokens['HEAD1.OP.NK'])))
+
 
     features.append(mapfunc('HEAD2:%s' % get_pos(useful_tokens['HEAD2'])))
     features.append(mapfunc('HEAD2.SB:%s' % get_pos(useful_tokens['HEAD2.SB'])))
@@ -256,28 +289,88 @@ def make_verb_feature_vector(useful_tokens, verb, sentence, mapfunc):
     features.append(mapfunc('HEAD3.DA:%s' % get_pos(useful_tokens['HEAD3.DA'])))
     features.append(mapfunc('HEAD3.OP.NK:%s' % get_pos(useful_tokens['HEAD3.OP.NK'])))
 
+
+# #   show features
+#     features = []
+#     root_path = chain_to_root(sentence, verb)
+#     root_path_pos = map(lambda x: x.pos, root_path)
+#     root_path_label = map(lambda x: skip_conj_label(sentence, x), root_path)
+
+#     features.append(mapfunc('PATH.POS:%s' % '_'.join(root_path_pos)))
+#     features.append(mapfunc('PATH.LABEL:%s' % '_'.join(root_path_label)))
+#     features.append(mapfunc('PATH.P1.LABEL:%s' % root_path_label[0]))
+#     features.append(mapfunc('PATH.P2.LABEL:%s' % '_'.join((root_path_label + ['--'])[:2])))
+#     if verb.pos == 'VVIZU' or get_token_by_path(sentence, verb, ['PM']) != None:
+#         features.append(mapfunc('ZU_INF'))
+#     features.append(mapfunc('SELF.OC.POS:%s' % get_pos(get_token_by_path(sentence, verb, ['OC']))))
+#     for pos in ['KOUI', 'KOUS', 'PWAV', 'PAV']:
+#         if get_deps_by_pos(sentence, verb, 'PWAV'):
+#             features.append(mapfunc('SELF.%s' % pos))
+
+#     features.append(mapfunc('HEAD1:%s' % get_pos(useful_tokens['HEAD1'])))
+#     features.append(mapfunc('HEAD1.SB:%s' % get_pos(useful_tokens['HEAD1.SB'])))
+#     features.append(mapfunc('HEAD1.OA:%s' % get_pos(useful_tokens['HEAD1.OA'])))
+#     features.append(mapfunc('HEAD1.DA:%s' % get_pos(useful_tokens['HEAD1.DA'])))
+#     features.append(mapfunc('HEAD1.OP.NK:%s' % get_pos(useful_tokens['HEAD1.OP.NK'])))
+
+
+#     features.append(mapfunc('HEAD2:%s' % get_pos(useful_tokens['HEAD2'])))
+#     features.append(mapfunc('HEAD2.SB:%s' % get_pos(useful_tokens['HEAD2.SB'])))
+#     features.append(mapfunc('HEAD2.OA:%s' % get_pos(useful_tokens['HEAD2.OA'])))
+#     features.append(mapfunc('HEAD2.DA:%s' % get_pos(useful_tokens['HEAD2.DA'])))
+#     features.append(mapfunc('HEAD2.OP.NK:%s' % get_pos(useful_tokens['HEAD2.OP.NK'])))
+
+#     features.append(mapfunc('HEAD3:%s' % get_pos(useful_tokens['HEAD3'])))
+#     features.append(mapfunc('HEAD3.SB:%s' % get_pos(useful_tokens['HEAD3.SB'])))
+#     features.append(mapfunc('HEAD3.OA:%s' % get_pos(useful_tokens['HEAD3.OA'])))
+#     features.append(mapfunc('HEAD3.DA:%s' % get_pos(useful_tokens['HEAD3.DA'])))
+#     features.append(mapfunc('HEAD3.OP.NK:%s' % get_pos(useful_tokens['HEAD3.OP.NK'])))
+
+
     return features
 
 
 # Make features for candidates of a subject in a secondary dependency 
 # (not necessary to be a noun, just easier to understand)
 def make_noun_feature_vector(useful_tokens, noun, sentence, mapfunc):
+    # print noun.form
     features = []
     features.append(mapfunc('NOUN_POS:%s' % noun.pos))
-    features.append(mapfunc('NOUN_IS_HEAD1.SB:%s' % (noun == useful_tokens['HEAD1.SB'])))
-    features.append(mapfunc('NOUN_IS_HEAD1.OA:%s' % (noun == useful_tokens['HEAD1.OA'])))
-    features.append(mapfunc('NOUN_IS_HEAD1.DA:%s' % (noun == useful_tokens['HEAD1.DA'])))
-    features.append(mapfunc('NOUN_IS_HEAD1.OP.NK:%s' % (noun == useful_tokens['HEAD1.OP.NK'])))
-    features.append(mapfunc('NOUN_IS_HEAD2.SB:%s' % (noun == useful_tokens['HEAD2.SB'])))
-    features.append(mapfunc('NOUN_IS_HEAD2.OA:%s' % (noun == useful_tokens['HEAD2.OA'])))
-    features.append(mapfunc('NOUN_IS_HEAD2.DA:%s' % (noun == useful_tokens['HEAD2.DA'])))
-    features.append(mapfunc('NOUN_IS_HEAD2.OP.NK:%s' % (noun == useful_tokens['HEAD2.OP.NK'])))
-    features.append(mapfunc('NOUN_IS_HEAD3.SB:%s' % (noun == useful_tokens['HEAD3.SB'])))
-    features.append(mapfunc('NOUN_IS_HEAD3.OA:%s' % (noun == useful_tokens['HEAD3.OA'])))
-    features.append(mapfunc('NOUN_IS_HEAD3.DA:%s' % (noun == useful_tokens['HEAD3.DA'])))
-    features.append(mapfunc('NOUN_IS_HEAD3.OP.NK:%s' % (noun == useful_tokens['HEAD3.OP.NK'])))
+    # features.append(mapfunc('NOUN_IS_HEAD1.SB:%s' % (noun == useful_tokens['HEAD1.SB'])))
+    # features.append(mapfunc('NOUN_IS_HEAD1.OA:%s' % (noun == useful_tokens['HEAD1.OA'])))
+    # features.append(mapfunc('NOUN_IS_HEAD1.DA:%s' % (noun == useful_tokens['HEAD1.DA'])))
+    # features.append(mapfunc('NOUN_IS_HEAD1.OP.NK:%s' % (noun == useful_tokens['HEAD1.OP.NK'])))
+    # features.append(mapfunc('NOUN_IS_HEAD2.SB:%s' % (noun == useful_tokens['HEAD2.SB'])))
+    # features.append(mapfunc('NOUN_IS_HEAD2.OA:%s' % (noun == useful_tokens['HEAD2.OA'])))
+    # features.append(mapfunc('NOUN_IS_HEAD2.DA:%s' % (noun == useful_tokens['HEAD2.DA'])))
+    # features.append(mapfunc('NOUN_IS_HEAD2.OP.NK:%s' % (noun == useful_tokens['HEAD2.OP.NK'])))
+    # features.append(mapfunc('NOUN_IS_HEAD3.SB:%s' % (noun == useful_tokens['HEAD3.SB'])))
+    # features.append(mapfunc('NOUN_IS_HEAD3.OA:%s' % (noun == useful_tokens['HEAD3.OA'])))
+    # features.append(mapfunc('NOUN_IS_HEAD3.DA:%s' % (noun == useful_tokens['HEAD3.DA'])))
+    # features.append(mapfunc('NOUN_IS_HEAD3.OP.NK:%s' % (noun == useful_tokens['HEAD3.OP.NK'])))
 
+    for role in useful_tokens:
+        if noun == useful_tokens[role]:
+            features.append(mapfunc('NOUN_IS_%s' % role))
+
+
+
+
+
+    # experimental
+    # features.append(mapfunc('NOUN_BEFORE_VERB:%s' % (int(noun.tid) < int(useful_tokens['VERB'].tid))))
+    features.append(mapfunc('NOUN_IS_HEAD1.SECSUBJ:%s' % (useful_tokens['HEAD1'] and str(useful_tokens['HEAD1'].tid) in noun.sec_heads)))
+    # features.append(mapfunc('NOUN_IS_HEAD2.SECSUBJ:%s' % (useful_tokens['HEAD2'] and str(useful_tokens['HEAD2'].tid) in noun.sec_heads)))
+
+    # features.append(mapfunc('NOUN_BEFORE_HEAD1:%s' % (int(noun.tid) < int(useful_tokens['HEAD1'].tid))))
+    # features.append(mapfunc('NOUN_BEFORE_HEAD2:%s' % (int(noun.tid) < int(useful_tokens['HEAD2'].tid))))
+    # features.append(mapfunc('NOUN_BEFORE_HEAD3:%s' % (int(noun.tid) < int(useful_tokens['HEAD3'].tid))))
     return features
+
+def print_features(feattab, features, verb, noun):
+    print verb.form, '-->', noun.form
+    for f in features:
+        print '\t', feattab.mapback_feature(f)
 
 
 # Return the path of tokens from a given token(incl.) to root(excl.), skipping dependency of conjunctions
@@ -324,6 +417,17 @@ def get_token_by_path(sentence, token, path):
         else:
             token = token[0]
     return token
+
+
+
+
+def get_deps_by_pos(sentence, token, pos):
+    if type(pos) == str:
+        return [dep for dep in token.deps if dep.pos == pos]
+    elif type(pos) == list:
+        return [dep for dep in token.deps if dep.pos in pos]
+
+
 
 # Return the POS tag of a token
 def get_pos(token):
