@@ -79,30 +79,30 @@ def evaluate(pred_file):
 
 
 
-    # print '\nDetails:'
-    # details = set()
-    # for key in gold_inv_dic:
-    #     glabel = gold_inv_dic[key]
-    #     if key not in pred_inv_dic:
-    #         plabel = 'XXX'
-    #     else:
-    #         plabel = pred_inv_dic[key]
-    #     if glabel != plabel:
-    #         details.add((key, glabel, plabel))
+    print '\nDetails:'
+    details = set()
+    for key in gold_inv_dic:
+        glabel = gold_inv_dic[key]
+        if key not in pred_inv_dic:
+            plabel = 'XXX'
+        else:
+            plabel = pred_inv_dic[key]
+        if glabel != plabel:
+            details.add((key, glabel, plabel))
 
-    # for key in pred_inv_dic:
-    #     plabel = pred_inv_dic[key]
-    #     if key not in gold_inv_dic:
-    #         glabel = 'XXX'
-    #     else:
-    #         glabel = gold_inv_dic[key]
-    #     if glabel != plabel:
-    #         details.add((key, glabel, plabel))
+    for key in pred_inv_dic:
+        plabel = pred_inv_dic[key]
+        if key not in gold_inv_dic:
+            glabel = 'XXX'
+        else:
+            glabel = gold_inv_dic[key]
+        if glabel != plabel:
+            details.add((key, glabel, plabel))
 
-    # print len(details)
-    # for (index, glabel, plabel) in sorted(details, key = lambda x: int(x[0][0])):
-    #     if glabel in ['SBE', 'SBR', 'SBC'] or plabel in ['SBE', 'SBR', 'SBC']:
-    #         print '%s\t%s --> %s' % (index, glabel, plabel)
+    print len(details)
+    for (index, glabel, plabel) in sorted(details, key = lambda x: int(x[0][0])):
+        if glabel in ['SBE', 'SBR', 'SBC'] or plabel in ['SBE', 'SBR', 'SBC']:
+            print '%s\t%s --> %s' % (index, glabel, plabel)
 
 
 

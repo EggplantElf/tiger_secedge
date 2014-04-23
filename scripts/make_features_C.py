@@ -29,7 +29,7 @@ if __name__=='__main__':
     if args.train:
         for sentence in sentences(codecs.open(args.inputfile,encoding='utf-8'), ['SBC']):
             # if sentence[0].sid != '479':
-            #     continue
+                # continue
             traverse_train(sentence, feattab, feat_filter, outstream)
             # exit(0)
         feattab.save(args.mapfile)
@@ -38,10 +38,10 @@ if __name__=='__main__':
     elif args.pred:
         feattab.load(args.mapfile)
         for sentence in sentences(codecs.open(args.inputfile,encoding='utf-8')):
-            if sentence[0].sid != '10330':
-                continue
+            # if sentence[0].sid != '10052':
+                # continue
             traverse_pred(sentence, feattab, feat_filter, outstream)
-            exit(0)
+            # exit(0)
 
     elif args.mapback:
         pred = codecs.open(args.predfile,encoding='utf-8')

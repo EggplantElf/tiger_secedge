@@ -213,9 +213,6 @@ def traverse_train(sentence, feattab, feat_filter, outstream, label_filter = Non
 # travese all possible verb subject pairs
 def traverse_pred(sentence, feattab, feat_filter, outstream, label_filter = None):
     for tid1, verb in enumerate(sentence):
-        # debug
-        # if sentence[0].sid != '10330':
-            # continue
 
         if  verb.pos[0] == 'V' and  verb.head.pos != '-ROOT-':
             useful_tokens = get_useful_tokens( verb, sentence)
@@ -226,7 +223,9 @@ def traverse_pred(sentence, feattab, feat_filter, outstream, label_filter = None
                     label = verb.sec_subj[noun]
                     if label in label_filter:
                         noun_features = make_noun_feature_vector(useful_tokens, noun, sentence)
-                        features = add_features(verb_features, noun_features, feattab.register_feature, feat_filter)
+                        # print verb.form, '-->', noun.form
+
+                        features = add_features(verb_features, noun_features, feattab.map_feature, feat_filter, False)
                         write_to_file(0, features, outstream)
                         # debug
                         # for k, v in filter(lambda x: x[0] in feat_filter and x[1], verb_features.items() + noun_features.items()):
@@ -234,12 +233,14 @@ def traverse_pred(sentence, feattab, feat_filter, outstream, label_filter = None
             else:
                 for noun in related_nouns(verb):
                     noun_features = make_noun_feature_vector(useful_tokens, noun, sentence)
-                    features = add_features(verb_features, noun_features, feattab.map_feature, feat_filter)
-                    write_to_file(0,features,outstream)
-                    # debug
                     print verb.form, '-->', noun.form
-                    for k, v in filter(lambda x: x[0] in feat_filter and x[1], verb_features.items() + noun_features.items()):
-                        print '\t', k, v
+
+                    features = add_features(verb_features, noun_features, feattab.map_feature, feat_filter, True)
+                    write_to_file(0,features,outstream)
+                    # # debug
+                    # for k, v in filter(lambda x: x[0] in feat_filter and x[1], verb_features.items() + noun_features.items()):
+                    # # for k, v in verb_features.items() + noun_features.items():
+                    #     print '\t', k, v
 
 # travese all possible verb subject pairs
 def traverse_mapback(sentence, feattab, outstream, pred, label_filter = None):
@@ -306,12 +307,12 @@ def get_useful_tokens(verb, sentence):
     if op:
         dic['CLOSEST_OP.NK'] = op[0]
 
-    # wrong!!!
-    for i in [1,2,3]:
-        for role in ['OA', 'DA', 'OP.NK']:
-            print i, role, dic['HEAD%d.%s' % (i, role)], dic['HEAD%d.SB' % i]
-            if not dic['HEAD%d.%s' % (i, role)] and dic['HEAD%d.SB' % i]:
-                dic['CLOSEST_SB_ONLY'] = dic['HEAD%d.SB' % i]
+    # # wrong!!!
+    # for i in [1,2,3]:
+    #     for role in ['OA', 'DA', 'OP.NK']:
+    #         print i, role, dic['HEAD%d.%s' % (i, role)], dic['HEAD%d.SB' % i]
+    #         if not dic['HEAD%d.%s' % (i, role)] and dic['HEAD%d.SB' % i]:
+    #             dic['CLOSEST_SB_ONLY'] = dic['HEAD%d.SB' % i]
 
     return dic
 
@@ -323,7 +324,8 @@ def make_verb_feature_vector(useful_tokens, verb, sentence):
     root_path = chain_to_root(verb)
     root_path_pos = map(lambda x: x.pos, root_path)
     root_path_label = map(lambda x: skip_conj_label(x), root_path)
-
+    root_path_pos_label = map(lambda x: x[0] + '/' + x[1], zip(root_path_pos, root_path_label))
+    root_path_lemma = map(lambda x: x.lemma, root_path)
 
     # features.append(mapfunc('SELF.LEMMA:%s' % verb.lemma)) # decresed the accuracy, try embed brown cluster
 
@@ -332,7 +334,8 @@ def make_verb_feature_vector(useful_tokens, verb, sentence):
     # features.append(mapfunc('PATH.LABEL:%s' % '_'.join(root_path_label)))
     features['PATH.POS'] = '_'.join(root_path_pos)
     features['PATH.LABEL'] = '_'.join(root_path_label)
-
+    features['PATH.LABEL~POS'] = '_'.join(root_path_pos_label)
+    features['PATH.LEMMA'] = '_'.join(root_path_lemma)
     # prefixes of path to root
     # features.append(mapfunc('PATH.P1.POS:%s' % root_path_pos[0])) #?
     # features.append(mapfunc('PATH.P2.POS:%s' % '_'.join((root_path_pos + ['--'])[:2]))) #?
@@ -340,22 +343,36 @@ def make_verb_feature_vector(useful_tokens, verb, sentence):
     features['PATH.P2.LABEL'] = '_'.join((root_path_label + ['--'])[:2])
     # features['PATH.F3.LABEL'] = '_'.join((root_path_label + ['--', '--'])[:3])))
 
+    # lemmas of the heads
+    features['HEAD1.LEMMA'] = get_lemma(useful_tokens['HEAD1'])
+    features['HEAD2.LEMMA'] = get_lemma(useful_tokens['HEAD2'])
+    features['HEAD3.LEMMA'] = get_lemma(useful_tokens['HEAD3'])
+    features['SELF.LEMMA'] = get_lemma(useful_tokens['VERB'])
+
+    features['SELF.LEMMA+HEAD1.LEMMA'] = features['SELF.LEMMA'] + '+' + features['HEAD1.LEMMA']
+    features['SELF.LEMMA+HEAD2.LEMMA'] = features['SELF.LEMMA'] + '+' + features['HEAD2.LEMMA']
+    features['SELF.LEMMA+HEAD3.LEMMA'] = features['SELF.LEMMA'] + '+' + features['HEAD3.LEMMA']
+
+
     # whether the verb is infinitive with zu
-    features['ZU_INF'] = (verb.pos == 'VVIZU' or get_token_by_path(verb, ['PM']) != None)
+    features['ZU_INF'] = str(verb.pos == 'VVIZU' or get_token_by_path(verb, ['PM']) != None)
+
+    # if features['ZU_INF']:
+    features['ZU_INF~HEAD1.LEMMA'] = features['HEAD1.LEMMA'] + '+' + str(features['ZU_INF'])
+    features['ZU_INF~HEAD2.LEMMA'] = features['HEAD2.LEMMA'] + '+' + str(features['ZU_INF']) 
+    features['ZU_INF~HEAD3.LEMMA'] = features['HEAD3.LEMMA'] + '+' + str(features['ZU_INF']) 
+
+
 
 
     # POS of the verb's OC dependant if there is one
     features['SELF.OC.POS'] = get_pos(get_token_by_path(verb, ['OC']))
     # whether the verb has "wie", "weil", "um" etc
 
-    for pos in ['KOUI', 'KOUS', 'PWAV', 'PAV']:
+    for pos in ['KOUI', 'KOUS', 'PWAV', 'PAV', 'PRELS', 'PRELAT']:
         features['SELF.%s' % pos] = (get_deps_by_pos(verb, pos) != [])
 
 
-    # lemmas of the heads
-    features['HEAD1.LEMMA'] = get_lemma(useful_tokens['HEAD1'])
-    features['HEAD2.LEMMA'] = get_lemma(useful_tokens['HEAD2'])
-    features['HEAD3.LEMMA'] = get_lemma(useful_tokens['HEAD3'])
 
     for role in useful_tokens:
         features[role] = get_pos(useful_tokens[role])
@@ -370,13 +387,42 @@ def make_verb_feature_vector(useful_tokens, verb, sentence):
 # (not necessary to be a noun, just easier to understand)
 def make_noun_feature_vector(useful_tokens, noun, sentence):
     # print noun.form
+    args = ['SB', 'OA', 'DA', 'OP.NK']
     features = {}
     features['NOUN_POS'] = noun.pos 
-
+    # s = struct(useful_tokens['VERB'], noun)
+    # features['STRUCT'] = s
     for role in useful_tokens:
-        features['NOUN_IS_%s' % role] = (noun == useful_tokens[role])
+        if (noun == useful_tokens[role]):
+            features['NOUN_IS_%s' % role] = True
+            head = role.split('.')[0]
+            if head in ['HEAD1', 'HEAD2', 'HEAD3']:
+                noun_arg = '.'.join(role.split('.')[1:])
+                features['%s.LEMMA+NOUN_IS_%s' % (head, role)] = useful_tokens[head].lemma
+                features['HEAD.LEMMA'] = useful_tokens[head].lemma
+                features['NOUN_POS+HEAD.LEMMA'] = noun.pos + '+' + useful_tokens[head].lemma
+                if head == 'HEAD1':
+                    for arg in args:
+                        if arg != noun_arg:
+                            features['SIB_' + arg] = str(useful_tokens[head + '.' + arg]!=None)
+                            features['NOUN.LABEL+SIB_' + arg] = noun_arg + '+' + features['SIB_' + arg]
+                elif head == 'HEAD2':
+                    for arg in args:
+                        if arg != noun_arg:
+                            features['SIB_' + arg] = str(useful_tokens[head + '.' + arg]!=None)
+                            features['NOUN.LABEL+SIB_' + arg] = noun_arg + '+' + features['SIB_' + arg]
 
+                        features['CLOSER_' + arg] = str(useful_tokens['HEAD1.' + arg]!=None)
+                        features['NOUN.LABEL+CLOSER_' + arg] = noun_arg + '+' + features['CLOSER_' + arg]
 
+                else:
+                    for arg in args:
+                        if arg != noun_arg:
+                            features['SIB_' + arg] = str(useful_tokens[head + '.' + arg]!=None)
+                            features['NOUN.LABEL+SIB_' + arg] = noun_arg + '+' + features['SIB_' + arg]
+
+                        features['CLOSER_' + arg] = str(useful_tokens['HEAD1.' + arg]!=None or useful_tokens['HEAD2.' + arg]!=None)
+                        features['NOUN.LABEL+CLOSER_' + arg] = noun_arg + '+' + features['CLOSER_' + arg]
 
 
 
@@ -390,10 +436,12 @@ def make_noun_feature_vector(useful_tokens, noun, sentence):
     # features.append(mapfunc('NOUN_BEFORE_HEAD3:%s' % (int(noun.tid) < int(useful_tokens['HEAD3'].tid))))
     return features
 
-def add_features(verb_features, noun_features, mapfunc, feat_filter):
+def add_features(verb_features, noun_features, mapfunc, feat_filter, debug = False):
     features = []
-    for k, v in filter(lambda x: x[0] in feat_filter and x[1], verb_features.items() + noun_features.items()):
+    for k, v in filter(lambda x: all([f in feat_filter for f in x[0].split('+')]) and x[1], verb_features.items() + noun_features.items()):
         features.append(mapfunc('%s:%s' % (k, v)))
+        if debug:
+            print '\t', k, v
     return features
 
 def read_feat_filter(filename):
@@ -475,4 +523,44 @@ def get_lemma(token):
         return token.lemma
     else:
         return None
+
+def struct(verb, noun):
+    found = False
+    string = ''
+    chain = chain_to_root(verb)
+    if len(chain) > 3:
+        chain = chain[1:3]
+    string = '*%s(%s)' % (verb.pos, verb.label)
+    for token in chain:
+        string += '%s(%s)[' % (token.pos, token.label)
+        sb = get_token_by_path(token, ['SB'])
+        oa = get_token_by_path(token, ['OA'])
+        da = get_token_by_path(token, ['DA'])
+        op = get_token_by_path(token, ['OP','NK'])
+        if noun in [sb, oa, da, op]:
+            found = True
+        if sb:
+            if noun == sb:
+                string += '*'
+            string += '%s(%s)' % (sb.pos, sb.label)
+        if oa:
+            if noun == oa:
+                string += '*'
+            string += '%s(%s)' % (oa.pos, oa.label)
+        if da:
+            if noun == da:
+                string += '*'
+            string += '%s(%s)' % (da.pos, da.label)
+        if op:
+            if noun == op:
+                string += '*'
+            string += '%s(%s)' % (op.pos, op.label)
+        string += ']'
+        if found:
+            break
+        # print 'struct', token.pos
+
+    return string
+
+
 
